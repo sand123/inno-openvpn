@@ -45,20 +45,12 @@ ClickNext=
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "{src}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/q /norestart"; WorkingDir: {src}; Check: Not IsFramework35Installed;  StatusMsg: Установка OpenVPN клиента... 
+Filename: "{src}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHORTCUTS=1"; WorkingDir: {src}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ... 
 Filename: "{src}\cert-wiz.hta"; Flags: postinstall nowait skipifsilent runasoriginaluser shellexec
 
 [Tasks]
 
 [Code]
-Function IsFramework35Installed : boolean;
-var installed : cardinal;
-    success: boolean;
-Begin
-  success := RegQueryDWordValue(HKLM, 'Software\Microsoft\NET Framework Setup\NDP\v3.5', 'Install', installed);
-  result := success and (installed = 1);
-End;
-
 Function InitializeSetup(): Boolean;
 begin
 Result := True;
@@ -69,6 +61,38 @@ if (GetWindowsVersion >= $05010000) and IsAdmin then
   end;
 end;
 
+function IsDesktop: Boolean;
+var
+  Version: TWindowsVersion;
+begin
+  GetWindowsVersionEx(Version);
+  Result := Version.ProductType = VER_NT_WORKSTATION;
+end;
+
+function IsWinXP: Boolean;
+var
+  Version: TWindowsVersion;
+begin
+  GetWindowsVersionEx(Version);
+  Result := Version.Major = 5;
+end;
+function IsWin7881: Boolean;
+var
+  Version: TWindowsVersion;
+begin
+  GetWindowsVersionEx(Version);
+  Result := Version.Major = 6;
+end;
+
+function IsWin10: Boolean;
+var
+  Version: TWindowsVersion;
+begin
+  GetWindowsVersionEx(Version);
+  Result := Version.Major = 10;
+end;
+
+//custom project functions
 Procedure InitializeWizard();
 begin
   WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
