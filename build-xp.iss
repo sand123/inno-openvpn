@@ -61,7 +61,7 @@ begin
 
   WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
   WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
-  WizardForm.WelcomeLabel2.Font.Size := 14; // красный
+  WizardForm.WelcomeLabel2.Font.Size := 12; // красный
 
   WizardForm.FinishedLabel.Caption := 'Перезагрузите компьютер и попробуйте подключиться';
 
