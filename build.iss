@@ -65,12 +65,17 @@ begin
     'Архив с настройками:',         
     'архив с настройками|*.tar.gz', 
     '.tar.gz'
-  );   
+  );  
+  
+  ProfileArchiveFilePage.SubCaptionLabel.Font.Size := 12;
+  ProfileArchiveFilePage.SubCaptionLabel.Font.Color := clRed;
+  ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold]; 
 end;
 
 function GetCertArchivePath(Param: string): string;
 begin
   ProfileAchiveLocation := ProfileArchiveFilePage.Values[0];
+  Result := ProfileAchiveLocation
 end;
 
 function IsDesktop: Boolean;
