@@ -33,7 +33,7 @@ Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteaft
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
-WelcomeLabel2=Для подключения Вам понадобится архив с настройками вида ivanov.tar.gz - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе%n%nПродолжите установку только после получения архива
+WelcomeLabel2=Для подключения Вам понадобится архив с настройками вида ivanov.tar.gz или ivanov.zip - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе%n%nПродолжите установку только после получения архива
 ClickNext=
 FinishedLabelNoIcons=Установка выполнена. После перезагрузки Вы сможете подключиться - обратите внимание на картинку справа
 ClickFinish=Для подключения используйте свой логин и пароль для входа в рабочий компьютер. Иконка у Вас на рабочем столе - посмотрите на неё на картинке слева
@@ -46,8 +46,9 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 Filename: "{app}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
 Filename: "{app}\openvpn-install-2.4.8-I602-Win7.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin7881 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
 Filename: "{app}\openvpn-install-2.3.18-I001-i686-WinXP.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWinXP And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
-Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}";
-Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config";
+Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}"; Check:isTarProfile;
+Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:isTarProfile;
+Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:not isTarProfile;
 
 [Code]
 
@@ -67,19 +68,24 @@ begin
     CreateInputFilePage(
       wpWelcome,
       'Выберите файл',      
-      'Архив с настройками вида ivanov.tar.gz. Выберите файл и нажмите ДАЛЕЕ',
+      'Архив с настройками вида ivanov.tar.gz или ivanov.zip. Выберите файл и нажмите ДАЛЕЕ',
       ''
     );
 
   ProfileArchiveFilePage.Add(
     'Архив с настройками:',         
-    'архив с настройками|*.tar.gz', 
-    '.tar.gz'
+    'архивы *.zip *.tar.gz|*.*', 
+    ''
   );  
   
   ProfileArchiveFilePage.SubCaptionLabel.Font.Size := 12;
   ProfileArchiveFilePage.SubCaptionLabel.Font.Color := clRed;
   ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold]; 
+end;
+
+function IsTarProfile: Boolean;
+begin
+  Result := Pos('.tar.gz', ProfileArchiveLocation) > 0;
 end;
 
 function GetCertArchivePath(Param: string): string;
