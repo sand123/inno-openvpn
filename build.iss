@@ -18,7 +18,7 @@ DisableDirPage=yes
 DisableFinishedPage=yes
 DisableProgramGroupPage=yes
 FlatComponentsList=yes
-OutputBaseFilename=openvpn_2.4.8_s3ru_repack.exe
+OutputBaseFilename=openvpn_2.4.8_s3ru_repack
 OutputDir=..
 SetupLogging=yes
 SourceDir=source
@@ -29,6 +29,7 @@ PrivilegesRequired=admin
 
 [Files]
 Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{code:GetCertArchivePath}"; DestDir: "{app}"; Flags: external
 
 [Icons]
 Name: "{group}\Менеджер сертификатов"; Filename: "{app}\cert-man.hta"
@@ -46,10 +47,37 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
 Filename: "{app}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ... 
-Filename: "mshta.exe"; Parameters: "{app}\cert-wizard.hta"; WorkingDir: {app}; StatusMsg: Импорт сертификатов;  Flags: runasoriginaluser postinstall nowait
+
 [Tasks]
 
 [Code]
+
+var ProfileArchiveFilePage: TInputFileWizardPage;
+
+Procedure InitializeWizard();
+begin
+  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
+  WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
+  WizardForm.WelcomeLabel2.Font.Size := 14; // красный
+
+  ProfileArchiveFilePage :=
+    CreateInputFilePage(
+      wpSelectDir,
+      'Выберите архив с настройками',
+      'Укажите путь?',
+      'Выберите архив с настройками вида ivanov.tar.gz - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе. Нажмите ДАЛЕЕ');
+
+  ProfileArchiveFilePage.Add(
+    'Архив с настройками:',         
+    'Архивы с настройками|*.tar.gz', 
+    '.tar.gz');   
+end;
+
+function GetCertArchivePath(Param: string): string;
+begin
+  Result := ProfileArchiveFilePage.Values[0];
+end;
+
 function IsDesktop: Boolean;
 var
   Version: TWindowsVersion;
@@ -79,12 +107,4 @@ var
 begin
   GetWindowsVersionEx(Version);
   Result := Version.Major = 10;
-end;
-
-//custom project functions
-Procedure InitializeWizard();
-begin
-  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
-  WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
-  WizardForm.WelcomeLabel2.Font.Size := 14; // красный
 end;
