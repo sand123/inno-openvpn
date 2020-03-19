@@ -8,7 +8,7 @@ AppCopyright=Copyright (C) 2020 Sokho-Service LLC
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
 AllowCancelDuringInstall=no
-DefaultDirName={commonpf}\soho-service.ru\repacks\openvpn
+DefaultDirName={win}\soho-service.ru\apps\repacks\openvpn
 AllowNoIcons=yes
 UninstallDisplayIcon={app}\icon.ico
 ChangesAssociations=yes
@@ -25,7 +25,7 @@ SourceDir=source
 SetupIconFile=icon.ico
 ShowLanguageDialog=no
 WizardStyle=modern
-PrivilegesRequired=lowest
+PrivilegesRequired=admin
 
 [Files]
 Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -45,22 +45,11 @@ ClickNext=
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "{src}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHORTCUTS=1"; WorkingDir: {src}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ... 
-Filename: "{src}\cert-wiz.hta"; Flags: postinstall nowait skipifsilent runasoriginaluser shellexec
-
+Filename: "{app}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ... 
+Filename: "mshta.exe"; Parameters: "{app}\cert-wizard.hta"; WorkingDir: {app}; StatusMsg: Импорт сертификатов;  Flags: runasoriginaluser postinstall nowait
 [Tasks]
 
 [Code]
-Function InitializeSetup(): Boolean;
-begin
-Result := True;
-if (GetWindowsVersion >= $05010000) and IsAdmin then
-  begin
-    MsgBox('Не запускайте установку от имени Администратора - запустите просто двойным кликом', mbError, MB_OK);
-    Result := False;
-  end;
-end;
-
 function IsDesktop: Boolean;
 var
   Version: TWindowsVersion;
@@ -91,6 +80,16 @@ begin
   GetWindowsVersionEx(Version);
   Result := Version.Major = 10;
 end;
+
+//Function InitializeSetup(): Boolean;
+//begin
+//Result := True;
+//if Not IsWinXP and IsAdmin then
+//  begin
+//    MsgBox('Не запускайте установку от имени Администратора - запустите просто двойным кликом', mbError, MB_OK);
+//    Result := False;
+//  end;
+//end;
 
 //custom project functions
 Procedure InitializeWizard();
