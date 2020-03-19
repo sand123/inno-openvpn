@@ -81,10 +81,27 @@ begin
   Result := Version.Major = 10;
 end;
 
+//Function InitializeSetup(): Boolean;
+//begin
+//Result := True;
+//if Not IsWinXP and IsAdmin then
+//  begin
+//    MsgBox('Не запускайте установку от имени Администратора - запустите просто двойным кликом', mbError, MB_OK);
+//    Result := False;
+//  end;
+//end;
+
 //custom project functions
 Procedure InitializeWizard();
 begin
   WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
   WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
   WizardForm.WelcomeLabel2.Font.Size := 14; // красный
+end;
+
+procedure RunImportCertificatesWizard(Sender: TObject);
+var
+  ErrorCode: Integer;
+begin
+  ShellExecAsOriginalUser('open', 'https://jrsoftware.org/isdonate.php', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
 end;
