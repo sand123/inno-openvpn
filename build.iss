@@ -47,8 +47,8 @@ Filename: "{app}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHO
 Filename: "{app}\openvpn-install-2.4.8-I602-Win7.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin7881 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
 Filename: "{app}\openvpn-install-2.3.18-I001-i686-WinXP.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWinXP And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
 Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}"; Check:isTarProfile;
-Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config\{code:GetCertBaseName}"; Check:isTarProfile;
-Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config\{code:GetCertBaseName}"; Check:not isTarProfile;
+Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:isTarProfile; BeforeInstall: ClearProfileConfig 
+Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:not isTarProfile; BeforeInstall: ClearProfileConfig
 
 [Code]
 
@@ -96,7 +96,7 @@ begin
   Result := ProfileArchiveLocation
 end;
 
-function GetCertBaseName(Value: String): String;
+Procedure ClearProfileConfig();
 var s: String;  
     fileExt: String;
     fileName: String;
@@ -104,7 +104,6 @@ begin
   
   if ProfileName <> '' Then 
   begin
-    Result:= ProfileName;
     Exit;
   end;
 
@@ -113,14 +112,11 @@ begin
   StringChangeEx(fileName,fileExt,'', True);
   ProfileName := fileName
   Log('extract profile name ' + ProfileName);
-  if DirExists('c:\Program Files\OpenVPN\Config\' + ProfileName) Then 
+  if DirExists('c:\Program Files\OpenVPN\Config') Then 
   begin
     Log('clear dir c:\Program Files\OpenVPN\Config');
     DelTree('c:\Program Files\OpenVPN\Config\*', False, True, True);
   end;
-  Log('create dir c:\Program Files\OpenVPN\Config\' + ProfileName);
-  CreateDir('c:\Program Files\OpenVPN\Config\' + ProfileName);
-  Result := ProfileName;
 end;
 
 function GetCertArchiveName(Value: string): String;
