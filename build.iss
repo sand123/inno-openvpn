@@ -97,8 +97,7 @@ begin
 end;
 
 Procedure ClearProfileConfig();
-var s: String;  
-    fileExt: String;
+var fileExt: String;
     fileName: String;
 begin
   
@@ -126,7 +125,6 @@ end;
 
 function GetCertArchiveName2(Value: string): String;
 var s: String;
-    r: String;
 begin
   s := ExtractFileName(ProfileArchiveLocation);
   StringChangeEx(s,'.gz','', True);
