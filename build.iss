@@ -1,5 +1,6 @@
-[Setup]
+﻿[Setup]
 AppId=openvpn_s3ru_repack
+DisableWelcomePage=no
 AppName=OpenVPN S3RU Repack
 AppComments=OpenVPN repacked by soho-service.ru support team
 AppVersion=1.0.0.0
@@ -24,18 +25,16 @@ SourceDir=source
 SetupIconFile=icon.ico
 ShowLanguageDialog=no
 WizardStyle=modern
-
-[Types]
-Name: "compact"; Description: "������� ���������"
-
-[Components]
-Name: "program"; Description: "����� ��������� � ����������"; Types: compact; Flags: fixed
+PrivilegesRequired=lowest
 
 [Files]
-Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: program 
+Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\�������� ������������"; Filename: "{app}\cert-man.hta"
+Name: "{group}\Менеджер сертификатов"; Filename: "{app}\cert-man.hta"
+
+[Messages]
+WelcomeLabel2=Эта программа установит все необходимые компоненты для доступа к корпоративной сети в офисе. Для работы Вам понадобится архив с настройками - получите их в Техподдержке заранее
 
 ;[Dirs]
 ;Name: "{app}"; Permissions: everyone-modify
@@ -44,15 +43,39 @@ Name: "{group}\�������� ������������"; Filename: "{app}\cert-man.hta"
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "{src}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/q /norestart"; WorkingDir: {src}; Check: Not IsFramework35Installed;  StatusMsg: ��������� OpenVPN �������... 
+Filename: "{src}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/q /norestart"; WorkingDir: {src}; Check: Not IsFramework35Installed;  StatusMsg: Установка OpenVPN клиента... 
+Filename: "{src}\cert-wiz.hta"; Flags: postinstall nowait skipifsilent runasoriginaluser shellexec
 
 [Tasks]
 
 [Code]
 Function IsFramework35Installed : boolean;
-  var installed : cardinal;
-      success: boolean;
-  Begin
-    success := RegQueryDWordValue(HKLM, 'Software\Microsoft\NET Framework Setup\NDP\v3.5', 'Install', installed);
-    result := success and (installed = 1);
-  End;
+var installed : cardinal;
+    success: boolean;
+Begin
+  success := RegQueryDWordValue(HKLM, 'Software\Microsoft\NET Framework Setup\NDP\v3.5', 'Install', installed);
+  result := success and (installed = 1);
+End;
+
+Function InitializeSetup(): Boolean;
+begin
+Result := True;
+if (GetWindowsVersion >= $05010000) and IsAdmin then
+  begin
+    MsgBox('Не запускайте установку от имени Администратора - запустите просто двойным кликом', mbError, MB_OK);
+    Result := False;
+  end;
+end;
+
+Procedure InitializeWizard();
+begin
+  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
+  WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
+end;
+
+procedure RunImportCertificatesWizard(Sender: TObject);
+var
+  ErrorCode: Integer;
+begin
+  ShellExecAsOriginalUser('open', 'https://jrsoftware.org/isdonate.php', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+end;
