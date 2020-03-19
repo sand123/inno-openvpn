@@ -41,8 +41,8 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
 Filename: "{app}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ... 
-Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}{code:GetCertArchiveName}"; WorkingDir:"{tmp}"; Flags: postinstall
-Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}{code:GetCertArchiveName2}"; WorkingDir:"{pf}\OpenVPN\Config"; Flags: postinstall
+Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}";
+Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config";
 
 [Code]
 
@@ -80,15 +80,19 @@ begin
   Result := ProfileArchiveLocation
 end;
 
-function GetCertArchiveName: String;
+function GetCertArchiveName(Value: string): String;
 begin
   Result := ExtractFileName(ProfileArchiveLocation);
 end;
 
 
-function GetCertArchiveName2: String;
+function GetCertArchiveName2(Value: string): String;
+var s: String;
+    r: String;
 begin
-  Result := StringChangeEx(ExtractFileName(ProfileArchiveLocation),'.gz','', True);
+  s := ExtractFileName(ProfileArchiveLocation);
+  StringChangeEx(s,'.gz','', True);
+  Result := s;
 end;
 
 
