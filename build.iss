@@ -148,7 +148,8 @@ begin
   GetWindowsVersionEx(Version);
   Result := Version.Major = 5;
 end;
-function IsWin7881: Boolean;
+
+function IsWin7881: Boolean;
 var
   Version: TWindowsVersion;
 begin
