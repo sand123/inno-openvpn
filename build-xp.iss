@@ -1,4 +1,4 @@
-п»ї[Setup]
+[Setup]
 AppId=openvpn_s3ru_repack
 DisableWelcomePage=no
 AppName=OpenVPN S3RU Repack
@@ -17,10 +17,10 @@ DirExistsWarning=no
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 FlatComponentsList=yes
-OutputBaseFilename=openvpn_2.4.8_win7-10_s3ru_repack
+OutputBaseFilename=openvpn_2.4.8_winxp_s3ru_repack
 OutputDir=..
 SetupLogging=yes
-SourceDir=source
+SourceDir=source-xp
 SetupIconFile=icon.ico
 ShowLanguageDialog=no
 WizardStyle=modern
@@ -32,19 +32,19 @@ Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubd
 Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
 
 [Messages]
-WelcomeLabel1=РЈСЃС‚Р°РЅРѕРІРєР° РїСЂРѕРіСЂР°РјРјС‹ РґР»СЏ РґРѕСЃС‚СѓРїР° Рє РєРѕСЂРїРѕСЂР°С‚РёРІРЅРѕР№ СЃРµС‚Рё
-WelcomeLabel2=Р”Р»СЏ РїРѕРґРєР»СЋС‡РµРЅРёСЏ Р’Р°Рј РїРѕРЅР°РґРѕР±РёС‚СЃСЏ Р°СЂС…РёРІ СЃ РЅР°СЃС‚СЂРѕР№РєР°РјРё РІРёРґР° ivanov.tar.gz РёР»Рё ivanov.zip - Р·Р°СЂР°РЅРµРµ РїРѕР»СѓС‡РёС‚Рµ РµРіРѕ С‡РµСЂРµР· Р·Р°СЏРІРєСѓ РІ РўРµС…РїРѕРґРґРµСЂР¶РєРµ РёР»Рё Сѓ РѕС‚РІРµС‚СЃС‚РІРµРЅРЅРѕРіРѕ СЃРѕС‚СЂСѓРґРЅРёРєР° РІ РѕС„РёСЃРµ%n%nРџСЂРѕРґРѕР»Р¶РёС‚Рµ СѓСЃС‚Р°РЅРѕРІРєСѓ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ РїРѕР»СѓС‡РµРЅРёСЏ Р°СЂС…РёРІР°
+WelcomeLabel1=Установка программы для доступа к корпоративной сети
+WelcomeLabel2=Для подключения Вам понадобится архив с настройками вида ivanov.tar.gz или ivanov.zip - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе%n%nПродолжите установку только после получения архива
 ClickNext=
-FinishedLabelNoIcons=РЈСЃС‚Р°РЅРѕРІРєР° РІС‹РїРѕР»РЅРµРЅР°. РџРѕСЃР»Рµ РїРµСЂРµР·Р°РіСЂСѓР·РєРё Р’С‹ СЃРјРѕР¶РµС‚Рµ РїРѕРґРєР»СЋС‡РёС‚СЊСЃСЏ - РѕР±СЂР°С‚РёС‚Рµ РІРЅРёРјР°РЅРёРµ РЅР° РєР°СЂС‚РёРЅРєСѓ СЃРїСЂР°РІР°
-ClickFinish=Р”Р»СЏ РїРѕРґРєР»СЋС‡РµРЅРёСЏ РёСЃРїРѕР»СЊР·СѓР№С‚Рµ СЃРІРѕР№ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ РґР»СЏ РІС…РѕРґР° РІ СЂР°Р±РѕС‡РёР№ РєРѕРјРїСЊСЋС‚РµСЂ. РРєРѕРЅРєР° Сѓ Р’Р°СЃ РЅР° СЂР°Р±РѕС‡РµРј СЃС‚РѕР»Рµ - РїРѕСЃРјРѕС‚СЂРёС‚Рµ РЅР° РЅРµС‘ РЅР° РєР°СЂС‚РёРЅРєРµ СЃР»РµРІР°
-FinishedRestartLabel=Р”Р»СЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РЅСѓР¶РЅРѕ РїРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊСЃСЏ - РїРѕСЃР»Рµ СЌС‚РѕРіРѕ РґР»СЏ РїРѕРґРєР»СЋС‡РµРЅРёСЏ РёСЃРїРѕР»СЊР·СѓР№С‚Рµ СЃРІРѕР№ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ РґР»СЏ РІС…РѕРґР° РІ СЂР°Р±РѕС‡РёР№ РєРѕРјРїСЊСЋС‚РµСЂ. РРєРѕРЅРєР° Сѓ Р’Р°СЃ РЅР° СЂР°Р±РѕС‡РµРј СЃС‚РѕР»Рµ - РїРѕСЃРјРѕС‚СЂРёС‚Рµ РЅР° РЅРµС‘ РЅР° РєР°СЂС‚РёРЅРєРµ СЃР»РµРІР°
+FinishedLabelNoIcons=Установка выполнена. После перезагрузки Вы сможете подключиться - обратите внимание на картинку справа
+ClickFinish=Для подключения используйте свой логин и пароль для входа в рабочий компьютер. Иконка у Вас на рабочем столе - посмотрите на неё на картинке слева
+FinishedRestartLabel=Для завершения нужно перезагрузиться - после этого для подключения используйте свой логин и пароль для входа в рабочий компьютер. Иконка у Вас на рабочем столе - посмотрите на неё на картинке слева
 
 [Languages]
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "{app}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin10 And IsDesktop;  StatusMsg: РЈСЃС‚Р°РЅРѕРІРєР° СЃРёСЃС‚РµРјРЅС‹С… РєРѕРјРїРѕРЅРµРЅС‚РѕРІ ...; AfterInstall: SetElevationBit 
-Filename: "{app}\openvpn-install-2.4.8-I602-Win7.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin7881 And IsDesktop;  StatusMsg: РЈСЃС‚Р°РЅРѕРІРєР° СЃРёСЃС‚РµРјРЅС‹С… РєРѕРјРїРѕРЅРµРЅС‚РѕРІ ...; AfterInstall: SetElevationBit 
+
+Filename: "{app}\openvpn-install-2.3.18-I001-i686-WinXP.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWinXP And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
 Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}"; Check:isTarProfile;
 Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:isTarProfile; BeforeInstall: ClearProfileConfig 
 Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:not isTarProfile; BeforeInstall: ClearProfileConfig
@@ -59,23 +59,23 @@ Procedure InitializeWizard();
 begin
   ProfileName:= '';
 
-  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //Р¶РёСЂРЅС‹Р№ С‚РµРєСЃС‚ РІ РѕРєРЅРµ РїСЂРёРІРµС‚СЃС‚РІРёСЏ
-  WizardForm.WelcomeLabel2.Font.Color := clRed; // РєСЂР°СЃРЅС‹Р№
-  WizardForm.WelcomeLabel2.Font.Size := 14; // РєСЂР°СЃРЅС‹Р№
+  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
+  WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
+  WizardForm.WelcomeLabel2.Font.Size := 14; // красный
 
-  WizardForm.FinishedLabel.Caption := 'РџРµСЂРµР·Р°РіСЂСѓР·РёС‚Рµ РєРѕРјРїСЊСЋС‚РµСЂ Рё РїРѕРїСЂРѕР±СѓР№С‚Рµ РїРѕРґРєР»СЋС‡РёС‚СЊСЃСЏ';
+  WizardForm.FinishedLabel.Caption := 'Перезагрузите компьютер и попробуйте подключиться';
 
   ProfileArchiveFilePage :=
     CreateInputFilePage(
       wpWelcome,
-      'Р’С‹Р±РµСЂРёС‚Рµ С„Р°Р№Р»',      
-      'РђСЂС…РёРІ СЃ РЅР°СЃС‚СЂРѕР№РєР°РјРё РІРёРґР° ivanov.tar.gz РёР»Рё ivanov.zip. Р’С‹Р±РµСЂРёС‚Рµ С„Р°Р№Р» Рё РЅР°Р¶РјРёС‚Рµ Р”РђР›Р•Р•',
+      'Выберите файл',      
+      'Архив с настройками вида ivanov.tar.gz или ivanov.zip. Выберите файл и нажмите ДАЛЕЕ',
       ''
     );
 
   ProfileArchiveFilePage.Add(
-    'РђСЂС…РёРІ СЃ РЅР°СЃС‚СЂРѕР№РєР°РјРё:',         
-    'Р°СЂС…РёРІС‹ *.zip *.tar.gz|*.*', 
+    'Архив с настройками:',         
+    'архивы *.zip *.tar.gz|*.*', 
     ''
   );  
   
