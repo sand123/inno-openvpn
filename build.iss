@@ -34,7 +34,9 @@ Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubd
 Name: "{group}\Менеджер сертификатов"; Filename: "{app}\cert-man.hta"
 
 [Messages]
-WelcomeLabel2=Эта программа установит все необходимые компоненты для доступа к корпоративной сети в офисе. Для работы Вам понадобится архив с настройками - получите их в Техподдержке заранее
+WelcomeLabel1=Установка программы для доступа к корпоративной сети
+WelcomeLabel2=Для подключения Вам понадобится архив с настройками вида ivanov.tar.gz - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе
+ClickNext=
 
 ;[Dirs]
 ;Name: "{app}"; Permissions: everyone-modify
@@ -71,6 +73,7 @@ Procedure InitializeWizard();
 begin
   WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
   WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
+  WizardForm.WelcomeLabel2.Font.Size := 14; // красный
 end;
 
 procedure RunImportCertificatesWizard(Sender: TObject);
