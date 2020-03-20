@@ -3,7 +3,7 @@ AppId=openvpn_s3ru_repack
 DisableWelcomePage=no
 AppName=OpenVPN S3RU Repack
 AppComments=OpenVPN repacked by soho-service.ru support team
-AppVersion=1.0.0.2
+AppVersion=1.0.0.3
 AppCopyright=Copyright (C) 2020 Sokho-Service LLC
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
@@ -114,6 +114,11 @@ begin
   begin
     Log('clear dir c:\Program Files\OpenVPN\Config');
     DelTree('c:\Program Files\OpenVPN\Config\*', False, True, True);
+  end;
+  if Not DirExists('c:\Program Files\OpenVPN\Config') Then 
+  begin
+    Log('create dir c:\Program Files\OpenVPN\Config');
+    CreateDir('c:\Program Files\OpenVPN\Config')
   end;
 end;
 
