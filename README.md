@@ -1,5 +1,5 @@
 # inno-openvpn
-Repack openvpn GUI with custom certificates wizard
+Repack openvpn GUI with custom import certificates wizard
 
 1) build with winXP/7/10 original installers inside
 2) prompt user to point certificates archive in tar.gz/zip format
