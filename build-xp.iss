@@ -1,9 +1,9 @@
-[Setup]
+Ôªø[Setup]
 AppId=openvpn_s3ru_repack
 DisableWelcomePage=no
 AppName=OpenVPN S3RU Repack
 AppComments=OpenVPN repacked by soho-service.ru support team
-AppVersion=1.0.0.3
+AppVersion=1.0.0.4
 AppCopyright=Copyright (C) 2020 Sokho-Service LLC
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
@@ -17,7 +17,7 @@ DirExistsWarning=no
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 FlatComponentsList=yes
-OutputBaseFilename=openvpn_2.4.8_winxp_s3ru_repack
+OutputBaseFilename=openvpn_2.3.18_winxp_{#SetupSetting("AppVersion")}
 OutputDir=..
 SetupLogging=yes
 SourceDir=source-xp
@@ -32,19 +32,19 @@ Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubd
 Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
 
 [Messages]
-WelcomeLabel1=”ÒÚ‡ÌÓ‚Í‡ ÔÓ„‡ÏÏ˚ ‰Îˇ ‰ÓÒÚÛÔ‡ Í ÍÓÔÓ‡ÚË‚ÌÓÈ ÒÂÚË
-WelcomeLabel2=ƒÎˇ ÔÓ‰ÍÎ˛˜ÂÌËˇ ¬‡Ï ÔÓÌ‡‰Ó·ËÚÒˇ ‡ıË‚ Ò Ì‡ÒÚÓÈÍ‡ÏË ‚Ë‰‡ ivanov.tar.gz ËÎË ivanov.zip - Á‡‡ÌÂÂ ÔÓÎÛ˜ËÚÂ Â„Ó ˜ÂÂÁ Á‡ˇ‚ÍÛ ‚ “ÂıÔÓ‰‰ÂÊÍÂ ËÎË Û ÓÚ‚ÂÚÒÚ‚ÂÌÌÓ„Ó ÒÓÚÛ‰ÌËÍ‡ ‚ ÓÙËÒÂ%n%nœÓ‰ÓÎÊËÚÂ ÛÒÚ‡ÌÓ‚ÍÛ ÚÓÎ¸ÍÓ ÔÓÒÎÂ ÔÓÎÛ˜ÂÌËˇ ‡ıË‚‡
+WelcomeLabel1=–£—Å—Ç–∞–Ω–æ–≤–∫–∞ –ø—Ä–æ–≥—Ä–∞–º–º—ã –¥–ª—è –¥–æ—Å—Ç—É–ø–∞ –∫ –∫–æ—Ä–ø–æ—Ä–∞—Ç–∏–≤–Ω–æ–π —Å–µ—Ç–∏
+WelcomeLabel2=–î–ª—è –ø–æ–¥–∫–ª—é—á–µ–Ω–∏—è –í–∞–º –ø–æ–Ω–∞–¥–æ–±–∏—Ç—Å—è –∞—Ä—Ö–∏–≤ —Å –Ω–∞—Å—Ç—Ä–æ–π–∫–∞–º–∏ –≤–∏–¥–∞ ivanov.tar.gz –∏–ª–∏ ivanov.zip - –∑–∞—Ä–∞–Ω–µ–µ –ø–æ–ª—É—á–∏—Ç–µ –µ–≥–æ —á–µ—Ä–µ–∑ –∑–∞—è–≤–∫—É –≤ –¢–µ—Ö–ø–æ–¥–¥–µ—Ä–∂–∫–µ –∏–ª–∏ —É –æ—Ç–≤–µ—Ç—Å—Ç–≤–µ–Ω–Ω–æ–≥–æ —Å–æ—Ç—Ä—É–¥–Ω–∏–∫–∞ –≤ –æ—Ñ–∏—Å–µ%n%n–ü—Ä–æ–¥–æ–ª–∂–∏—Ç–µ —É—Å—Ç–∞–Ω–æ–≤–∫—É —Ç–æ–ª—å–∫–æ –ø–æ—Å–ª–µ –ø–æ–ª—É—á–µ–Ω–∏—è –∞—Ä—Ö–∏–≤–∞
 ClickNext=
-FinishedLabelNoIcons=”ÒÚ‡ÌÓ‚Í‡ ‚˚ÔÓÎÌÂÌ‡. œÓÒÎÂ ÔÂÂÁ‡„ÛÁÍË ¬˚ ÒÏÓÊÂÚÂ ÔÓ‰ÍÎ˛˜ËÚ¸Òˇ - Ó·‡ÚËÚÂ ‚ÌËÏ‡ÌËÂ Ì‡ Í‡ÚËÌÍÛ ÒÔ‡‚‡
-ClickFinish=ƒÎˇ ÔÓ‰ÍÎ˛˜ÂÌËˇ ËÒÔÓÎ¸ÁÛÈÚÂ Ò‚ÓÈ ÎÓ„ËÌ Ë Ô‡ÓÎ¸ ‰Îˇ ‚ıÓ‰‡ ‚ ‡·Ó˜ËÈ ÍÓÏÔ¸˛ÚÂ. »ÍÓÌÍ‡ Û ¬‡Ò Ì‡ ‡·Ó˜ÂÏ ÒÚÓÎÂ - ÔÓÒÏÓÚËÚÂ Ì‡ ÌÂ∏ Ì‡ Í‡ÚËÌÍÂ ÒÎÂ‚‡
-FinishedRestartLabel=ƒÎˇ Á‡‚Â¯ÂÌËˇ ÌÛÊÌÓ ÔÂÂÁ‡„ÛÁËÚ¸Òˇ - ÔÓÒÎÂ ˝ÚÓ„Ó ‰Îˇ ÔÓ‰ÍÎ˛˜ÂÌËˇ ËÒÔÓÎ¸ÁÛÈÚÂ Ò‚ÓÈ ÎÓ„ËÌ Ë Ô‡ÓÎ¸ ‰Îˇ ‚ıÓ‰‡ ‚ ‡·Ó˜ËÈ ÍÓÏÔ¸˛ÚÂ. »ÍÓÌÍ‡ Û ¬‡Ò Ì‡ ‡·Ó˜ÂÏ ÒÚÓÎÂ - ÔÓÒÏÓÚËÚÂ Ì‡ ÌÂ∏ Ì‡ Í‡ÚËÌÍÂ ÒÎÂ‚‡
+FinishedLabelNoIcons=–£—Å—Ç–∞–Ω–æ–≤–∫–∞ –≤—ã–ø–æ–ª–Ω–µ–Ω–∞. –ü–æ—Å–ª–µ –ø–µ—Ä–µ–∑–∞–≥—Ä—É–∑–∫–∏ –í—ã —Å–º–æ–∂–µ—Ç–µ –ø–æ–¥–∫–ª—é—á–∏—Ç—å—Å—è - –æ–±—Ä–∞—Ç–∏—Ç–µ –≤–Ω–∏–º–∞–Ω–∏–µ –Ω–∞ –∫–∞—Ä—Ç–∏–Ω–∫—É —Å–ø—Ä–∞–≤–∞
+ClickFinish=–î–ª—è –ø–æ–¥–∫–ª—é—á–µ–Ω–∏—è –∏—Å–ø–æ–ª—å–∑—É–π—Ç–µ —Å–≤–æ–π –ª–æ–≥–∏–Ω –∏ –ø–∞—Ä–æ–ª—å –¥–ª—è –≤—Ö–æ–¥–∞ –≤ —Ä–∞–±–æ—á–∏–π –∫–æ–º–ø—å—é—Ç–µ—Ä. –ò–∫–æ–Ω–∫–∞ —É –í–∞—Å –Ω–∞ —Ä–∞–±–æ—á–µ–º —Å—Ç–æ–ª–µ - –ø–æ—Å–º–æ—Ç—Ä–∏—Ç–µ –Ω–∞ –Ω–µ—ë –Ω–∞ –∫–∞—Ä—Ç–∏–Ω–∫–µ —Å–ª–µ–≤–∞
+FinishedRestartLabel=–î–ª—è –∑–∞–≤–µ—Ä—à–µ–Ω–∏—è –Ω—É–∂–Ω–æ –ø–µ—Ä–µ–∑–∞–≥—Ä—É–∑–∏—Ç—å—Å—è - –ø–æ—Å–ª–µ —ç—Ç–æ–≥–æ –¥–ª—è –ø–æ–¥–∫–ª—é—á–µ–Ω–∏—è –∏—Å–ø–æ–ª—å–∑—É–π—Ç–µ —Å–≤–æ–π –ª–æ–≥–∏–Ω –∏ –ø–∞—Ä–æ–ª—å –¥–ª—è –≤—Ö–æ–¥–∞ –≤ —Ä–∞–±–æ—á–∏–π –∫–æ–º–ø—å—é—Ç–µ—Ä. –ò–∫–æ–Ω–∫–∞ —É –í–∞—Å –Ω–∞ —Ä–∞–±–æ—á–µ–º —Å—Ç–æ–ª–µ - –ø–æ—Å–º–æ—Ç—Ä–∏—Ç–µ –Ω–∞ –Ω–µ—ë –Ω–∞ –∫–∞—Ä—Ç–∏–Ω–∫–µ —Å–ª–µ–≤–∞
 
 [Languages]
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
 
-Filename: "{app}\openvpn-install-2.3.18-I001-i686-WinXP.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWinXP And IsDesktop;  StatusMsg: ”ÒÚ‡ÌÓ‚Í‡ ÒËÒÚÂÏÌ˚ı ÍÓÏÔÓÌÂÌÚÓ‚ ...;
+Filename: "{app}\openvpn-install-2.3.18-I001-i686-WinXP.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWinXP And IsDesktop;  StatusMsg: –£—Å—Ç–∞–Ω–æ–≤–∫–∞ —Å–∏—Å—Ç–µ–º–Ω—ã—Ö –∫–æ–º–ø–æ–Ω–µ–Ω—Ç–æ–≤ ...;
 Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}"; Check:isTarProfile;
 Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:isTarProfile; BeforeInstall: ClearProfileConfig 
 Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:not isTarProfile; BeforeInstall: ClearProfileConfig
@@ -59,29 +59,47 @@ Procedure InitializeWizard();
 begin
   ProfileName:= '';
 
-  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //ÊËÌ˚È ÚÂÍÒÚ ‚ ÓÍÌÂ ÔË‚ÂÚÒÚ‚Ëˇ
-  WizardForm.WelcomeLabel2.Font.Color := clRed; // Í‡ÒÌ˚È
-  WizardForm.WelcomeLabel2.Font.Size := 12; // Í‡ÒÌ˚È
+  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //–∂–∏—Ä–Ω—ã–π —Ç–µ–∫—Å—Ç –≤ –æ–∫–Ω–µ –ø—Ä–∏–≤–µ—Ç—Å—Ç–≤–∏—è
+  WizardForm.WelcomeLabel2.Font.Color := clRed; // –∫—Ä–∞—Å–Ω—ã–π
+  WizardForm.WelcomeLabel2.Font.Size := 12; // –∫—Ä–∞—Å–Ω—ã–π
 
-  WizardForm.FinishedLabel.Caption := 'œÂÂÁ‡„ÛÁËÚÂ ÍÓÏÔ¸˛ÚÂ Ë ÔÓÔÓ·ÛÈÚÂ ÔÓ‰ÍÎ˛˜ËÚ¸Òˇ';
+  WizardForm.FinishedLabel.Caption := '–ü–µ—Ä–µ–∑–∞–≥—Ä—É–∑–∏—Ç–µ –∫–æ–º–ø—å—é—Ç–µ—Ä –∏ –ø–æ–ø—Ä–æ–±—É–π—Ç–µ –ø–æ–¥–∫–ª—é—á–∏—Ç—å—Å—è';
 
   ProfileArchiveFilePage :=
     CreateInputFilePage(
       wpWelcome,
-      '¬˚·ÂËÚÂ Ù‡ÈÎ',      
-      '¿ıË‚ Ò Ì‡ÒÚÓÈÍ‡ÏË ‚Ë‰‡ ivanov.tar.gz ËÎË ivanov.zip. ¬˚·ÂËÚÂ Ù‡ÈÎ Ë Ì‡ÊÏËÚÂ ƒ¿À≈≈',
+      '–í—ã–±–µ—Ä–∏—Ç–µ —Ñ–∞–π–ª',      
+      '–ê—Ä—Ö–∏–≤ —Å –Ω–∞—Å—Ç—Ä–æ–π–∫–∞–º–∏ –≤–∏–¥–∞ ivanov.tar.gz –∏–ª–∏ ivanov.zip. –í—ã–±–µ—Ä–∏—Ç–µ —Ñ–∞–π–ª –∏ –Ω–∞–∂–º–∏—Ç–µ –î–ê–õ–ï–ï',
       ''
     );
 
   ProfileArchiveFilePage.Add(
-    '¿ıË‚ Ò Ì‡ÒÚÓÈÍ‡ÏË:',         
-    '‡ıË‚˚ *.zip *.tar.gz|*.*', 
+    '–ê—Ä—Ö–∏–≤ —Å –Ω–∞—Å—Ç—Ä–æ–π–∫–∞–º–∏:',         
+    '–∞—Ä—Ö–∏–≤—ã *.zip *.tar.gz|*.*', 
     ''
   );  
   
   ProfileArchiveFilePage.SubCaptionLabel.Font.Size := 12;
   ProfileArchiveFilePage.SubCaptionLabel.Font.Color := clRed;
   ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold];
+end;
+
+function IsProfileSelected: Boolean;
+var selectedFile: String;
+begin
+  selectedFile := ProfileArchiveFilePage.Values[0]
+  Result := (Pos('.tar.gz', selectedFile) > 0) Or (Pos('.zip', selectedFile) > 0)
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  if (CurPageID = ProfileArchiveFilePage.ID) AND (IsProfileSelected = False) then
+  begin
+    MsgBox('–í—ã–±–µ—Ä–∏—Ç–µ –∞—Ä—Ö–∏–≤ —Å –Ω–∞—Å—Ç—Ä–æ–π–∫–∞–º–∏', mbError, MB_OK);
+    Result := False;
+    Exit;
+  end;
+  Result := True;
 end;
 
 function IsTarProfile: Boolean;
