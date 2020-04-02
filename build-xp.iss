@@ -3,7 +3,7 @@ AppId=openvpn_s3ru_repack
 DisableWelcomePage=no
 AppName=OpenVPN S3RU Repack
 AppComments=OpenVPN repacked by soho-service.ru support team
-AppVersion=1.0.0.4
+AppVersion=1.0.0.5
 AppCopyright=Copyright (C) 2020 Sokho-Service LLC
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
@@ -44,7 +44,7 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
 
-Filename: "{app}\openvpn-install-2.3.18-I001-i686-WinXP.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWinXP And IsDesktop;  StatusMsg: Установка системных компонентов ...;
+Filename: "{app}\openvpn-install-2.3.18-I001-i686-WinXP.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=1 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWinXP And IsDesktop;  StatusMsg: Установка системных компонентов ...;
 Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}"; Check:isTarProfile;
 Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:isTarProfile; BeforeInstall: ClearProfileConfig 
 Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:not isTarProfile; BeforeInstall: ClearProfileConfig
