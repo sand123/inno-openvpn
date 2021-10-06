@@ -17,7 +17,7 @@ DirExistsWarning=no
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 FlatComponentsList=yes
-OutputBaseFilename=openvpn-2.5.4-x64-{#SetupSetting("AppVersion")}
+OutputBaseFilename=openvpn-bundle-2.5.4win10-2.4.11win7881-x64-{#SetupSetting("AppVersion")}
 OutputDir=..
 SetupLogging=yes
 SourceDir=source
@@ -43,8 +43,8 @@ FinishedRestartLabel=Для завершения нужно перезагруз
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "{app}\openvpn-install-2.4.8-I602-Win10.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=1 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
-Filename: "{app}\openvpn-install-2.4.6-I602-Win7.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin7881 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\OpenVPN-2.5.4-I601-amd64.msi"" ADDLOCAL=OpenVPN.Service,OpenVPN,Drivers,Drivers.Wintun /passive /SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=1 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
+Filename: "{app}\openvpn-install-2.4.11-I602-Win7.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin7881 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
 Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}"; Check:isTarProfile;
 Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:isTarProfile; BeforeInstall: ClearProfileConfig 
 Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:not isTarProfile; BeforeInstall: ClearProfileConfig

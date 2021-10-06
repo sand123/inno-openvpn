@@ -7,3 +7,6 @@ Repack openvpn GUI with custom import certificates wizard
 
 build-xp for InnoSetup 5 (as latest supported)  
 build - for InnoSetup 6 (Win7-10)  
+
+MSI commands  
+https://community.openvpn.net/openvpn/wiki/OpenVPN2.5_Windows_MSI_Unattended_Install  
