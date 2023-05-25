@@ -1,19 +1,20 @@
 ﻿#define OVPN_DL_ROOT_URL        "https://swupdate.openvpn.org/community/releases/"
 #define OVPN_LATEST_BUILD       "OpenVPN-2.6.4-I001-amd64"
 #define OVPN_INSTALL_DIR        "c:\Program Files\OpenVPN"
-#define OVPN_CONFIG_DIR         "c:\Program Files\OpenVPN\Config"
+#define OVPN_CONFIG_DIR         "c:\Program Files\OpenVPN\config"
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
+#define PACKAGE_VERSION         "2.6.4.20230525"
 
 [Setup]
 AllowCancelDuringInstall=no
 AllowNoIcons=yes
 AppComments=OpenVPN repacked by soho-service.ru support team
-AppCopyright=Copyright (C) 2021 Sokho-Service LLC
+AppCopyright=Copyright (C) 2023 Sokho-Service LLC
 AppId=openvpn_s3ru_repack
 AppName=OpenVPN S3RU Repack
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
-AppVersion=2.6.4.20230525
+AppVersion={#PACKAGE_VERSION}
 ChangesAssociations=yes
 CloseApplications=yes
 DefaultDirName={win}\soho-service.ru\apps\repacks\openvpn
