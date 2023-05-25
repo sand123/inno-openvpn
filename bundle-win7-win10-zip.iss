@@ -1,36 +1,41 @@
-﻿[Setup]
-AppId=openvpn_s3ru_repack
-DisableWelcomePage=no
-AppName=OpenVPN S3RU Repack
+﻿#define OVPN_DL_ROOT_URL "https://swupdate.openvpn.org/community/releases/"
+#define OVPN_LATEST_BUILD "OpenVPN-2.6.4-I001-amd64"
+#define OVPN_CONFIG_DIR "c:\Program Files\OpenVPN\Config"
+#define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
+
+[Setup]
+AllowCancelDuringInstall=no
+AllowNoIcons=yes
 AppComments=OpenVPN repacked by soho-service.ru support team
-AppVersion=2.6.4.20230525
 AppCopyright=Copyright (C) 2021 Sokho-Service LLC
+AppId=openvpn_s3ru_repack
+AppName=OpenVPN S3RU Repack
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
-AllowCancelDuringInstall=no
-DefaultDirName={win}\soho-service.ru\apps\repacks\openvpn
-AllowNoIcons=yes
-UninstallDisplayIcon={app}\icon.ico
+AppVersion=2.6.4.20230525
 ChangesAssociations=yes
 CloseApplications=yes
+DefaultDirName={win}\soho-service.ru\apps\repacks\openvpn
 DirExistsWarning=no
 DisableDirPage=yes
 DisableProgramGroupPage=yes
+DisableWelcomePage=no
 FlatComponentsList=yes
 OutputBaseFilename=openvpn-bundle-{#SetupSetting("AppVersion")}-x64
 OutputDir=..
-SetupLogging=yes
-SourceDir=source
-SetupIconFile=icon.ico
-ShowLanguageDialog=no
-WizardStyle=modern
-WizardImageFile=banner.bmp
 PrivilegesRequired=admin
+SetupIconFile=icon.ico
+SetupLogging=yes
+ShowLanguageDialog=no
+SourceDir=source
+UninstallDisplayIcon={app}\icon.ico
+WizardImageFile=banner.bmp
+WizardStyle=modern
 
 [Files]
 Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
-Source: "{tmp}\OpenVPN-2.6.4-I001-amd64.msi"; DestDir: "{app}"; Flags: external
+Source: "{tmp}\{#OVPN_LATEST_BUILD}.msi"; DestDir: "{app}"; Flags: external
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
@@ -44,12 +49,12 @@ FinishedRestartLabel=Для завершения нужно перезагруз
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/i ""{app}\OpenVPN-2.6.4-I001-amd64.msi"" /l*v ""{app}\OpenVPN-2.6.4-I001-amd64.log"" /passive ADDLOCAL=OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6 ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWin1X And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL=${#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWin1X And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
 
 [Code]
 const
   SHCONTCH_NOPROGRESSBOX = 4;
-  SHCONTCH_RESPONDYESTOALL = 16;
+  SHCONTCH_RESPONDYESTOALL = 16;  
 
 var ProfileArchiveFilePage: TInputFileWizardPage;
     DownloadPage: TDownloadWizardPage;
@@ -83,15 +88,15 @@ begin
   StringChangeEx(fileName,fileExt,'', True);
   ProfileName := fileName
   Log('extract profile name ' + ProfileName);
-  if DirExists('c:\Program Files\OpenVPN\Config') Then 
+  if DirExists('{OPENVPN_CONFIG_DIR}') Then 
   begin
-    Log('clear dir c:\Program Files\OpenVPN\Config');
-    DelTree('c:\Program Files\OpenVPN\Config\*', False, True, True);
+    Log('clear dir ' + '{OPENVPN_CONFIG_DIR}');
+    DelTree('{OPENVPN_CONFIG_DIR}\*', False, True, True);
   end;
-  if Not DirExists('c:\Program Files\OpenVPN\Config') Then 
+  if Not DirExists('{OPENVPN_CONFIG_DIR}') Then 
   begin
-    Log('create dir c:\Program Files\OpenVPN\Config');
-    CreateDir('c:\Program Files\OpenVPN\Config')
+    Log('create dir {OPENVPN_CONFIG_DIR}');
+    CreateDir('{OPENVPN_CONFIG_DIR}')
   end;
 end;
 
@@ -224,11 +229,11 @@ begin
   if CurPageID = wpReady then 
     begin     
       DownloadPage.Clear; 
-      DownloadPage.Add('https://swupdate.openvpn.org/community/releases/OpenVPN-2.6.4-I001-amd64.msi', 'OpenVPN-2.6.4-I001-amd64.msi', '');    
+      DownloadPage.Add('{OVPN_DL_ROOT_URL}{OVPN_LATEST_BUILD}.msi', '{OVPN_LATEST_BUILD}.msi', '');    
       DownloadPage.Show;
       try
         try
-          DownloadPage.Download; // This downloads the files to {tmp}  
+          DownloadPage.Download;
         except
           if DownloadPage.AbortedByUser then
             Log('dl aborted by user.')
@@ -242,7 +247,7 @@ begin
       if Result = True then
       begin
         ClearProfileConfig();
-        UnZip(GetCertArchivePath(''), 'c:\Program Files\OpenVPN\Config');
+        UnZip(GetCertArchivePath(''), '{OVPN_CONFIG_DIR}');
       end;
     end
 end;
