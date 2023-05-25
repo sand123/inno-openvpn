@@ -45,89 +45,22 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
 Filename: "msiexec.exe"; Parameters: "/i ""{app}\OpenVPN-2.6.4-I001-amd64.msi"" /l*v ""{app}\OpenVPN-2.6.4-I001-amd64.log"" /passive ADDLOCAL=OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6 ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWin1X And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
-Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; BeforeInstall: ClearProfileConfig
 
 [Code]
+const
+  SHCONTCH_NOPROGRESSBOX = 4;
+  SHCONTCH_RESPONDYESTOALL = 16;
 
 var ProfileArchiveFilePage: TInputFileWizardPage;
     DownloadPage: TDownloadWizardPage;
     ProfileArchiveLocation: String;
     ProfileName: String;
 
-Function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
-begin
-  if Progress = ProgressMax then
-    Log(Format('successfully downloaded file to {tmp}: %s', [FileName]));
-  Result := True;
-end;    
-
-Procedure InitializeWizard();
-begin
-  ProfileName:= '';
-
-  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
-  WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
-  WizardForm.WelcomeLabel2.Font.Size := 14; // красный
-
-  WizardForm.FinishedLabel.Caption := 'Перезагрузите компьютер и попробуйте подключиться';
-
-  ProfileArchiveFilePage :=
-    CreateInputFilePage(
-      wpWelcome,
-      'Выберите файл',      
-      'Архив с настройками вида ivanov.tar.gz или ivanov.zip. Выберите файл и нажмите ДАЛЕЕ',
-      ''
-    );
-
-  ProfileArchiveFilePage.Add(
-    'Архив с настройками:',         
-    'архивы *.zip|*.zip', 
-    ''
-  );  
-  
-  ProfileArchiveFilePage.SubCaptionLabel.Font.Size := 12;
-  ProfileArchiveFilePage.SubCaptionLabel.Font.Color := clRed;
-  ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold];
-
-  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
-end;
-
 function IsProfileSelected: Boolean;
 var selectedFile: String;
 begin
   selectedFile := ProfileArchiveFilePage.Values[0]
   Result := (Pos('.zip', selectedFile) > 0)
-end;
-
-function NextButtonClick(CurPageID: Integer): Boolean;
-begin
-  if (CurPageID = ProfileArchiveFilePage.ID) AND (IsProfileSelected = False) then
-  begin
-    MsgBox('Выберите архив с настройками', mbError, MB_OK);
-    Result := False;
-    Exit;
-  end;
-  if CurPageID = wpReady then 
-  begin
-    DownloadPage.Clear; 
-    DownloadPage.Add('https://swupdate.openvpn.org/community/releases/OpenVPN-2.6.4-I001-amd64.msi', 'OpenVPN-2.6.4-I001-amd64.msi', '');    
-    DownloadPage.Show;
-    try
-      try
-        DownloadPage.Download; // This downloads the files to {tmp}
-        Result := True;
-      except
-        if DownloadPage.AbortedByUser then
-          Log('dl aborted by user.')
-        else
-          SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
-        Result := False;
-      end;
-    finally
-      DownloadPage.Hide;
-    end;
-  end else    
-  Result := True;
 end;
 
 function GetCertArchivePath(Param: string): string;
@@ -219,4 +152,97 @@ begin
   finally
     Stream.Free;
   end;
+end;
+
+procedure UnZip(ZipPath, TargetPath: string); 
+var
+  Shell: Variant;
+  ZipFile: Variant;
+  TargetFolder: Variant;
+begin
+  Shell := CreateOleObject('Shell.Application');
+
+  ZipFile := Shell.NameSpace(ZipPath);
+  if VarIsClear(ZipFile) then
+    RaiseException(
+      Format('Архив с настройками "%s" не может поврежден - запросите новую версию в техподдержке', [ZipPath]));
+
+  TargetFolder := Shell.NameSpace(TargetPath);
+  if VarIsClear(TargetFolder) then
+    RaiseException(Format('Путь "%s" не найден', [TargetPath]));
+
+  TargetFolder.CopyHere(ZipFile.Items, SHCONTCH_NOPROGRESSBOX or SHCONTCH_RESPONDYESTOALL);
+end;
+
+Function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
+begin
+  if Progress = ProgressMax then
+    Log(Format('successfully downloaded file to {tmp}: %s', [FileName]));
+  Result := True;
+end;    
+
+Procedure InitializeWizard();
+begin
+  ProfileName:= '';
+
+  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
+  WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
+  WizardForm.WelcomeLabel2.Font.Size := 14; // красный
+
+  WizardForm.FinishedLabel.Caption := 'Перезагрузите компьютер и попробуйте подключиться';
+
+  ProfileArchiveFilePage :=
+    CreateInputFilePage(
+      wpWelcome,
+      'Выберите файл',      
+      'Архив с настройками вида ivanov.tar.gz или ivanov.zip. Выберите файл и нажмите ДАЛЕЕ',
+      ''
+    );
+
+  ProfileArchiveFilePage.Add(
+    'Архив с настройками:',         
+    'архивы *.zip|*.zip', 
+    ''
+  );  
+  
+  ProfileArchiveFilePage.SubCaptionLabel.Font.Size := 12;
+  ProfileArchiveFilePage.SubCaptionLabel.Font.Color := clRed;
+  ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold];
+
+  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  Result := True;
+  if (CurPageID = ProfileArchiveFilePage.ID) AND (IsProfileSelected = False) then
+  begin
+    MsgBox('Выберите архив с настройками', mbError, MB_OK);
+    Result := False;
+    Exit;
+  end;
+  if CurPageID = wpReady then 
+    begin     
+      DownloadPage.Clear; 
+      DownloadPage.Add('https://swupdate.openvpn.org/community/releases/OpenVPN-2.6.4-I001-amd64.msi', 'OpenVPN-2.6.4-I001-amd64.msi', '');    
+      DownloadPage.Show;
+      try
+        try
+          DownloadPage.Download; // This downloads the files to {tmp}  
+        except
+          if DownloadPage.AbortedByUser then
+            Log('dl aborted by user.')
+          else
+            SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
+          Result := False;
+        end;
+      finally
+        DownloadPage.Hide;
+      end;
+      if Result = True then
+      begin
+        ClearProfileConfig();
+        UnZip(GetCertArchivePath(''), 'c:\Program Files\OpenVPN\Config');
+      end;
+    end
 end;
