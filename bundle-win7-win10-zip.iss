@@ -88,15 +88,15 @@ begin
   StringChangeEx(fileName,fileExt,'', True);
   ProfileName := fileName
   Log('extract profile name ' + ProfileName);
-  if DirExists('{OPENVPN_CONFIG_DIR}') Then 
+  if DirExists('{#OVPN_CONFIG_DIR}') Then 
   begin
-    Log('clear dir ' + '{OPENVPN_CONFIG_DIR}');
-    DelTree('{OPENVPN_CONFIG_DIR}\*', False, True, True);
+    Log('clear dir ' + '{#OVPN_CONFIG_DIR}');
+    DelTree('{#OVPN_CONFIG_DIR}\*', False, True, True);
   end;
-  if Not DirExists('{OPENVPN_CONFIG_DIR}') Then 
+  if Not DirExists('{#OVPN_CONFIG_DIR}') Then 
   begin
-    Log('create dir {OPENVPN_CONFIG_DIR}');
-    CreateDir('{OPENVPN_CONFIG_DIR}')
+    Log('create dir {#OVPN_CONFIG_DIR}');
+    CreateDir('{#OVPN_CONFIG_DIR}')
   end;
 end;
 
@@ -229,7 +229,7 @@ begin
   if CurPageID = wpReady then 
     begin     
       DownloadPage.Clear; 
-      DownloadPage.Add('{OVPN_DL_ROOT_URL}{OVPN_LATEST_BUILD}.msi', '{OVPN_LATEST_BUILD}.msi', '');    
+      DownloadPage.Add('{#OVPN_DL_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '');    
       DownloadPage.Show;
       try
         try
@@ -238,8 +238,11 @@ begin
           if DownloadPage.AbortedByUser then
             Log('dl aborted by user.')
           else
+            begin
             SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
-          Result := False;
+            Result := False;
+            Exit;
+            end
         end;
       finally
         DownloadPage.Hide;
@@ -247,7 +250,7 @@ begin
       if Result = True then
       begin
         ClearProfileConfig();
-        UnZip(GetCertArchivePath(''), '{OVPN_CONFIG_DIR}');
+        UnZip(GetCertArchivePath(''), '{#OVPN_CONFIG_DIR}');
       end;
     end
 end;
