@@ -50,7 +50,7 @@ FinishedRestartLabel=Для завершения нужно перезагруз
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL=${#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWin1X And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWin1X And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
 
 [Code]
 const
