@@ -152,9 +152,8 @@ var
 begin
   Filename := ExpandConstant('{commondesktop}\OpenVPN GUI.lnk');
   Log('setting elevation bit for ' + Filename);
-
-  Stream := TFileStream.Create(FileName, fmOpenReadWrite);
   try
+	Stream := TFileStream.Create(FileName, fmOpenReadWrite);
     Stream.Seek(21, soFromBeginning);
     SetLength(Buffer, 1);
     Stream.ReadBuffer(Buffer, 1);
