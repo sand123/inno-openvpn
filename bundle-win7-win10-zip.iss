@@ -3,7 +3,7 @@ AppId=openvpn_s3ru_repack
 DisableWelcomePage=no
 AppName=OpenVPN S3RU Repack
 AppComments=OpenVPN repacked by soho-service.ru support team
-AppVersion=2.5.4.20211006
+AppVersion=2.6.4.20230525
 AppCopyright=Copyright (C) 2021 Sokho-Service LLC
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
@@ -30,10 +30,11 @@ PrivilegesRequired=admin
 [Files]
 Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
+Source: "{tmp}\OpenVPN-2.6.4-I001-amd64.msi"; DestDir: "{app}"; Flags: external
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
-WelcomeLabel2=Для подключения Вам понадобится архив с настройками вида ivanov.tar.gz или ivanov.zip - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе%n%nПродолжите установку только после получения архива
+WelcomeLabel2=Для подключения Вам понадобится архив с настройками вида ivanov.zip - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе%n%nПродолжите установку только после получения архива
 ClickNext=
 FinishedLabelNoIcons=Установка выполнена. После перезагрузки Вы сможете подключиться - обратите внимание на картинку рядом
 ClickFinish=Для подключения используйте свой логин и пароль для входа в рабочий компьютер. Иконка у Вас на рабочем столе - посмотрите на неё на картинке
@@ -43,17 +44,22 @@ FinishedRestartLabel=Для завершения нужно перезагруз
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/i ""{app}\OpenVPN-2.5.4-I601-amd64.msi"" /l*v ""{app}\OpenVPN-2.5.4-I601-amd64.log"" /passive ADDLOCAL=OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6 ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWin10 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
-Filename: "{app}\openvpn-install-2.4.11-I602-Win7.exe"; Parameters: "/SELECT_SHORTCUTS=1 /SELECT_OPENVPN=1 /SELECT_SERVICE=0 /SELECT_TAP=1 /SELECT_OPENVPNGUI=1 /SELECT_ASSOCIATIONS=0 /SELECT_OPENSSL_UTILITIES=0 /SELECT_EASYRSA=0 /SELECT_OPENSSLDLLS=1 /SELECT_LZODLLS=1 /SELECT_PKCS11DLLS=1 /S"; WorkingDir: {app}; Check: IsWin7881 And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
-Filename: "{app}\utils\gzip.exe"; Parameters: "--decompress --force --quiet {tmp}\{code:GetCertArchiveName}"; WorkingDir:"{tmp}"; Check:isTarProfile;
-Filename: "{app}\utils\tar.exe"; Parameters: "--extract --file={tmp}\{code:GetCertArchiveName2}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:isTarProfile; BeforeInstall: ClearProfileConfig 
-Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; Check:not isTarProfile; BeforeInstall: ClearProfileConfig
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\OpenVPN-2.6.4-I001-amd64.msi"" /l*v ""{app}\OpenVPN-2.6.4-I001-amd64.log"" /passive ADDLOCAL=OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6 ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWin1X And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
+Filename: "{app}\utils\unzip.exe"; Parameters: "-o -qq {tmp}\{code:GetCertArchiveName}"; WorkingDir:"c:\Program Files\OpenVPN\Config"; BeforeInstall: ClearProfileConfig
 
 [Code]
 
 var ProfileArchiveFilePage: TInputFileWizardPage;
+    DownloadPage: TDownloadWizardPage;
     ProfileArchiveLocation: String;
-    ProfileName: String;    
+    ProfileName: String;
+
+Function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
+begin
+  if Progress = ProgressMax then
+    Log(Format('successfully downloaded file to {tmp}: %s', [FileName]));
+  Result := True;
+end;    
 
 Procedure InitializeWizard();
 begin
@@ -75,20 +81,22 @@ begin
 
   ProfileArchiveFilePage.Add(
     'Архив с настройками:',         
-    'архивы *.zip *.tar.gz|*.*', 
+    'архивы *.zip|*.zip', 
     ''
   );  
   
   ProfileArchiveFilePage.SubCaptionLabel.Font.Size := 12;
   ProfileArchiveFilePage.SubCaptionLabel.Font.Color := clRed;
   ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold];
+
+  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
 end;
 
 function IsProfileSelected: Boolean;
 var selectedFile: String;
 begin
   selectedFile := ProfileArchiveFilePage.Values[0]
-  Result := (Pos('.tar.gz', selectedFile) > 0) Or (Pos('.zip', selectedFile) > 0)
+  Result := (Pos('.zip', selectedFile) > 0)
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
@@ -99,12 +107,27 @@ begin
     Result := False;
     Exit;
   end;
+  if CurPageID = wpReady then 
+  begin
+    DownloadPage.Clear; 
+    DownloadPage.Add('https://swupdate.openvpn.org/community/releases/OpenVPN-2.6.4-I001-amd64.msi', 'OpenVPN-2.6.4-I001-amd64.msi', '');    
+    DownloadPage.Show;
+    try
+      try
+        DownloadPage.Download; // This downloads the files to {tmp}
+        Result := True;
+      except
+        if DownloadPage.AbortedByUser then
+          Log('dl aborted by user.')
+        else
+          SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
+        Result := False;
+      end;
+    finally
+      DownloadPage.Hide;
+    end;
+  end else    
   Result := True;
-end;
-
-function IsTarProfile: Boolean;
-begin
-  Result := Pos('.tar.gz', ProfileArchiveLocation) > 0;
 end;
 
 function GetCertArchivePath(Param: string): string;
@@ -116,8 +139,7 @@ end;
 Procedure ClearProfileConfig();
 var fileExt: String;
     fileName: String;
-begin
-  
+begin                      
   if ProfileName <> '' Then 
   begin
     Exit;
@@ -145,14 +167,6 @@ begin
   Result := ExtractFileName(ProfileArchiveLocation);
 end;
 
-function GetCertArchiveName2(Value: string): String;
-var s: String;
-begin
-  s := ExtractFileName(ProfileArchiveLocation);
-  StringChangeEx(s,'.gz','', True);
-  Result := s;
-end;
-
 function IsDesktop: Boolean;
 var
   Version: TWindowsVersion;
@@ -177,7 +191,7 @@ begin
   Result := Version.Major = 6;
 end;
 
-function IsWin10: Boolean;
+function IsWin1X: Boolean;
 var
   Version: TWindowsVersion;
 begin
