@@ -1,6 +1,7 @@
-﻿#define OVPN_DL_ROOT_URL "https://swupdate.openvpn.org/community/releases/"
-#define OVPN_LATEST_BUILD "OpenVPN-2.6.4-I001-amd64"
-#define OVPN_CONFIG_DIR "c:\Program Files\OpenVPN\Config"
+﻿#define OVPN_DL_ROOT_URL        "https://swupdate.openvpn.org/community/releases/"
+#define OVPN_LATEST_BUILD       "OpenVPN-2.6.4-I001-amd64"
+#define OVPN_INSTALL_DIR        "c:\Program Files\OpenVPN"
+#define OVPN_CONFIG_DIR         "c:\Program Files\OpenVPN\Config"
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 [Setup]
@@ -88,6 +89,11 @@ begin
   StringChangeEx(fileName,fileExt,'', True);
   ProfileName := fileName
   Log('extract profile name ' + ProfileName);
+  if Not DirExists('{#OVPN_INSTALL_DIR}') Then 
+  begin
+    Log('create dir {#OVPN_INSTALL_DIR}');
+    CreateDir('{#OVPN_INSTALL_DIR}')
+  end;
   if DirExists('{#OVPN_CONFIG_DIR}') Then 
   begin
     Log('clear dir ' + '{#OVPN_CONFIG_DIR}');
