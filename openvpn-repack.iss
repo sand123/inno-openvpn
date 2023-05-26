@@ -2,8 +2,13 @@
 #define OVPN_LATEST_BUILD       "OpenVPN-2.6.4-I001-amd64"
 #define OVPN_INSTALL_DIR        "c:\Program Files\OpenVPN"
 #define OVPN_CONFIG_DIR         "c:\Program Files\OpenVPN\config"
+#define OVPN_AUTOCONFIG_DIR     "c:\Program Files\OpenVPN\config-auto"
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
+
+// внутрення версия сборки = оригинальный_релиз.дата_сборки
 #define PACKAGE_VERSION         "2.6.4.20230525"
+// ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
+#define CONFIG_SET_RUN_AS_ADMIN "1"
 
 [Setup]
 AllowCancelDuringInstall=no
@@ -51,7 +56,7 @@ FinishedRestartLabel=Для завершения нужно перезагруз
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWin1X And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: SetElevationBit 
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall 
 
 [Code]
 const
@@ -105,6 +110,16 @@ begin
     Log('create dir {#OVPN_CONFIG_DIR}');
     CreateDir('{#OVPN_CONFIG_DIR}')
   end;
+  if DirExists('{#OVPN_AUTOCONFIG_DIR}') Then 
+  begin
+    Log('clear dir ' + '{#OVPN_AUTOCONFIG_DIR}');
+    DelTree('{#OVPN_AUTOCONFIG_DIR}\*', False, True, True);
+  end;
+  if Not DirExists('{#OVPN_AUTOCONFIG_DIR}') Then 
+  begin
+    Log('create dir {#OVPN_AUTOCONFIG_DIR}');
+    CreateDir('{#OVPN_AUTOCONFIG_DIR}')
+  end;
 end;
 
 function GetCertArchiveName(Value: string): String;
@@ -136,7 +151,7 @@ begin
   Result := Version.Major = 6;
 end;
 
-function IsWin1X: Boolean;
+function IsWin1x: Boolean;
 var
   Version: TWindowsVersion;
 begin
@@ -144,6 +159,13 @@ begin
   Result := Version.Major = 10;
 end;
 
+function IsWinSupported: Boolean;
+begin  
+  Result := IsWin7881 Or IsWin1x;
+end;
+
+// установка флага ярлыка на рабочем столе - Запускать от администратора
+// только если  CONFIG_SET_RUN_AS_ADMIN = 1
 procedure SetElevationBit();
 var
   Filename: string;
@@ -165,7 +187,8 @@ begin
   end;
 end;
 
-procedure UnZip(ZipPath, TargetPath: string); 
+// распаковка архива встроенными средствами Windows 
+procedure UnZip(ZipPath, TargetPath: string);
 var
   Shell: Variant;
   ZipFile: Variant;
@@ -185,6 +208,18 @@ begin
   TargetFolder.CopyHere(ZipFile.Items, SHCONTCH_NOPROGRESSBOX or SHCONTCH_RESPONDYESTOALL);
 end;
 
+// задачи после установки MSI
+procedure AfterMSIInstall();
+begin
+  if '{#CONFIG_SET_RUN_AS_ADMIN}' <> '1' Then
+  begin
+    SetElevationBit;
+  end;
+  ClearProfileConfig();
+  UnZip(GetCertArchivePath(''), '{#OVPN_CONFIG_DIR}');
+end;
+
+// обновление индикатора загрузки на форме
 Function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
 begin
   if Progress = ProgressMax then
@@ -192,6 +227,7 @@ begin
   Result := True;
 end;    
 
+// служебный код - инициализация мастера
 Procedure InitializeWizard();
 begin
   ProfileName:= '';
@@ -223,9 +259,11 @@ begin
   DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
 end;
 
+// служебный код - обработчик перехода по экранам
 function NextButtonClick(CurPageID: Integer): Boolean;
 begin
   Result := True;
+  // окно выбора архива с сертификатом
   if (CurPageID = ProfileArchiveFilePage.ID) AND (IsProfileSelected = False) then
   begin
     MsgBox('Выберите архив с настройками', mbError, MB_OK);
@@ -233,6 +271,7 @@ begin
     Exit;
   end;
   if CurPageID = wpReady then 
+  // все готово к установке - скачиваем релиз и запускаем
     begin     
       DownloadPage.Clear; 
       DownloadPage.Add('{#OVPN_DL_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '');    
@@ -252,11 +291,6 @@ begin
         end;
       finally
         DownloadPage.Hide;
-      end;
-      if Result = True then
-      begin
-        ClearProfileConfig();
-        UnZip(GetCertArchivePath(''), '{#OVPN_CONFIG_DIR}');
-      end;
+      end;      
     end
 end;
