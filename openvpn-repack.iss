@@ -43,6 +43,7 @@ WizardStyle=modern
 Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
 Source: "{tmp}\{#OVPN_LATEST_BUILD}.msi"; DestDir: "{app}"; Flags: external
+Source: "{code:GetUnpackedConfigFile}"; DestDir: "{code:GetTargetConfigPath}"; Flags: external ignoreversion recursesubdirs createallsubdirs 
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
@@ -54,7 +55,7 @@ FinishedLabelNoIcons=Установка выполнена. После пере�
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\logs\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall 
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\logs\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall; BeforeInstall: BeforeMSIInstall 
 
 [Code]
 const
@@ -66,6 +67,7 @@ var ProfileArchiveFilePage: TInputFileWizardPage;
     ProfileArchiveLocation: String;
     ProfileArchiveName: String;
     ProfileName: String;
+    UnpackedConfigFile: String;
 
 function IsProfileSelected: Boolean;
 var selectedFile: String;
@@ -89,6 +91,16 @@ begin
     ProfileName := fileName
     ProfileArchiveName := ExtractFileName(ProfileArchiveLocation);
   end;
+end;
+
+function GetTargetConfigPath(Param: String): String;
+begin
+    Result:= '{#OVPN_AUTOCONFIG_DIR}\';
+end;
+
+function GetUnpackedConfigFile(Param: String): String;
+begin
+    Result:= UnpackedConfigFile;
 end;
 
 Procedure ClearConfigOrCreatePath();
@@ -208,15 +220,12 @@ begin
   TargetFolder.CopyHere(ZipFile.Items, SHCONTCH_NOPROGRESSBOX or SHCONTCH_RESPONDYESTOALL);
 end;
 
-// задачи после установки MSI
-procedure AfterMSIInstall();
+// задачи до установки MSI
+procedure BeforeMSIInstall();
 var 
   unpacked: String;
-begin
-  if '{#CONFIG_SET_RUN_AS_ADMIN}' <> '1' Then
-  begin
-    SetElevationBit;
-  end;
+  fileRec: TFindRec;
+begin  
   Log('clear config or create path');
   ClearConfigOrCreatePath();
   Log('config dir created');
@@ -227,9 +236,24 @@ begin
   Log('unzip to unpacked ...');
   UnZip(ProfileArchiveLocation, unpacked);
   Log('unzip completed');
-  Log('copy ' + unpacked + '\ya.mashlykin.ovpn to ' + '{#OVPN_CONFIG_DIR}\');
-  FileCopy(unpacked + '\ya.mashlykin.ovpn', '{#OVPN_CONFIG_DIR}\ya.mashlykin.ovpn', False);
-  Log('copy completed');  
+  Log('lookup config file')
+  if FindFirst(ExpandConstant('{tmp}\unpacked\*.ovpn'), fileRec) then
+  try
+      UnpackedConfigFile := ExpandConstant('{tmp}\unpacked\') + fileRec.Name;
+  finally
+    FindClose(fileRec);
+  end;
+  Log('found ' + UnpackedConfigFile);
+end;
+
+
+// задачи после установки MSI
+procedure AfterMSIInstall();
+begin
+  if '{#CONFIG_SET_RUN_AS_ADMIN}' <> '1' Then
+  begin
+    SetElevationBit;
+  end;  
 end;
 
 // обновление индикатора загрузки на форме
