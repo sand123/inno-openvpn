@@ -22,7 +22,7 @@ AppPublisherURL=https://soho-service.ru
 AppVersion={#PACKAGE_VERSION}
 ChangesAssociations=yes
 CloseApplications=yes
-DefaultDirName={win}\soho-service.ru\apps\repacks\openvpn
+DefaultDirName={win}\soho-service.ru\repacks\openvpn
 DirExistsWarning=no
 DisableDirPage=yes
 DisableProgramGroupPage=yes
@@ -81,7 +81,7 @@ begin
   Result := ProfileArchiveLocation
 end;
 
-Procedure ClearProfileConfig();
+Procedure ClearConfigOrCreatePath();
 var fileExt: String;
     fileName: String;
 begin                      
@@ -175,13 +175,16 @@ begin
   Filename := ExpandConstant('{commondesktop}\OpenVPN GUI.lnk');
   Log('setting elevation bit for ' + Filename);
   try
-	Stream := TFileStream.Create(FileName, fmOpenReadWrite);
+    Stream := TFileStream.Create(FileName, fmOpenReadWrite);
     Stream.Seek(21, soFromBeginning);
     SetLength(Buffer, 1);
     Stream.ReadBuffer(Buffer, 1);
     Buffer[1] := Chr(Ord(Buffer[1]) or $20);
     Stream.Seek(-1, soFromCurrent);
     Stream.WriteBuffer(Buffer, 1);
+    Log('success');
+  except
+    Log('failed');
   finally
     Stream.Free;
   end;
@@ -215,7 +218,7 @@ begin
   begin
     SetElevationBit;
   end;
-  ClearProfileConfig();
+  ClearConfigOrCreatePath();
   UnZip(GetCertArchivePath(''), '{#OVPN_CONFIG_DIR}');
 end;
 
