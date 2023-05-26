@@ -46,17 +46,15 @@ Source: "{tmp}\{#OVPN_LATEST_BUILD}.msi"; DestDir: "{app}"; Flags: external
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
-WelcomeLabel2=Для подключения Вам понадобится архив с настройками вида ivanov.zip - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе%n%nПродолжите установку только после получения архива
+WelcomeLabel2=Для подключения Вам понадобится архив с настройками вида ivanov.zip или comp100.zip - заранее получите его через заявку в Техподдержке или у ответственного сотрудника в офисе%n%nПродолжите установку только после получения архива
 ClickNext=
 FinishedLabelNoIcons=Установка выполнена. После перезагрузки Вы сможете подключиться - обратите внимание на картинку рядом
-ClickFinish=Для подключения используйте свой логин и пароль для входа в рабочий компьютер. Иконка у Вас на рабочем столе - посмотрите на неё на картинке
-FinishedRestartLabel=Для завершения нужно перезагрузиться - после этого для подключения используйте свой логин и пароль для входа в рабочий компьютер. Иконка у Вас на рабочем столе - посмотрите на неё на картинке слева
 
 [Languages]
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall 
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\logs\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall 
 
 [Code]
 const
@@ -66,6 +64,7 @@ const
 var ProfileArchiveFilePage: TInputFileWizardPage;
     DownloadPage: TDownloadWizardPage;
     ProfileArchiveLocation: String;
+    ProfileArchiveName: String;
     ProfileName: String;
 
 function IsProfileSelected: Boolean;
@@ -76,25 +75,28 @@ begin
 end;
 
 function GetCertArchivePath(Param: string): string;
+var fileExt: String;
+    fileName: String;
 begin
-  ProfileArchiveLocation := ProfileArchiveFilePage.Values[0];
+  ProfileArchiveLocation := ProfileArchiveFilePage.Values[0];  
   Result := ProfileArchiveLocation
+
+  if ProfileArchiveLocation <> '' Then
+  begin
+    fileName := ExtractFileName(ProfileArchiveLocation);
+    fileExt := ExtractFileExt(ProfileArchiveLocation);
+    StringChangeEx(fileName,fileExt,'', True);
+    ProfileName := fileName
+    ProfileArchiveName := ExtractFileName(ProfileArchiveLocation);
+  end;
 end;
 
 Procedure ClearConfigOrCreatePath();
-var fileExt: String;
-    fileName: String;
 begin                      
   if ProfileName <> '' Then 
   begin
     Exit;
   end;
-
-  fileName := ExtractFileName(ProfileArchiveLocation);
-  fileExt := ExtractFileExt(ProfileArchiveLocation);
-  StringChangeEx(fileName,fileExt,'', True);
-  ProfileName := fileName
-  Log('extract profile name ' + ProfileName);
   if Not DirExists('{#OVPN_INSTALL_DIR}') Then 
   begin
     Log('create dir {#OVPN_INSTALL_DIR}');
@@ -120,11 +122,6 @@ begin
     Log('create dir {#OVPN_AUTOCONFIG_DIR}');
     CreateDir('{#OVPN_AUTOCONFIG_DIR}')
   end;
-end;
-
-function GetCertArchiveName(Value: string): String;
-begin
-  Result := ExtractFileName(ProfileArchiveLocation);
 end;
 
 function IsDesktop: Boolean;
@@ -213,13 +210,26 @@ end;
 
 // задачи после установки MSI
 procedure AfterMSIInstall();
+var 
+  unpacked: String;
 begin
   if '{#CONFIG_SET_RUN_AS_ADMIN}' <> '1' Then
   begin
     SetElevationBit;
   end;
+  Log('clear config or create path');
   ClearConfigOrCreatePath();
-  UnZip(GetCertArchivePath(''), '{#OVPN_CONFIG_DIR}');
+  Log('config dir created');
+  unpacked := ExpandConstant('{tmp}\unpacked');  
+  Log('creating temp unpacked ' + unpacked);
+  CreateDir(unpacked);
+  Log('created');
+  Log('unzip to unpacked ...');
+  UnZip(ProfileArchiveLocation, unpacked);
+  Log('unzip completed');
+  Log('copy ' + unpacked + '\ya.mashlykin.ovpn to ' + '{#OVPN_CONFIG_DIR}\');
+  FileCopy(unpacked + '\ya.mashlykin.ovpn', '{#OVPN_CONFIG_DIR}\ya.mashlykin.ovpn', False);
+  Log('copy completed');  
 end;
 
 // обновление индикатора загрузки на форме
@@ -239,13 +249,11 @@ begin
   WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
   WizardForm.WelcomeLabel2.Font.Size := 14; // красный
 
-  WizardForm.FinishedLabel.Caption := 'Перезагрузите компьютер и попробуйте подключиться';
-
   ProfileArchiveFilePage :=
     CreateInputFilePage(
       wpWelcome,
       'Выберите файл',      
-      'Архив с настройками вида ivanov.tar.gz или ivanov.zip. Выберите файл и нажмите ДАЛЕЕ',
+      'Архив с настройками вида ivanov.zip или comp100.zip. Выберите файл и нажмите ДАЛЕЕ',
       ''
     );
 
@@ -260,6 +268,15 @@ begin
   ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold];
 
   DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+end;
+
+// https://jrsoftware.org/ishelp/index.php?topic=scriptevents&anchor=CurPageChanged
+procedure CurPageChanged(CurPageID: Integer);
+begin
+    if (CurPageID = wpFinished) then
+    begin
+      WizardForm.FinishedLabel.Caption := 'Для завершения нужно перезагрузить компьютер - после этого для подключения используйте свой логин и пароль для входа в рабочий компьютер (если программа спросит пароль). Иконка у Вас на рабочем столе - посмотрите на неё на картинке слева';
+    end
 end;
 
 // служебный код - обработчик перехода по экранам
@@ -296,4 +313,75 @@ begin
         DownloadPage.Hide;
       end;      
     end
+end;
+
+// дальше общесистемные функции - можно не смотреть
+
+function GetAppID():string;
+begin
+  result := ExpandConstant('{#SetupSetting("AppID")}');     
+end;
+
+function GetAppUninstallRegKey():string;
+begin
+  result := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\' + GetAppID + '_is1'); //Get the Uninstall search path from the Registry
+end;
+
+function IsAppInstalled():boolean;
+var Key : string;          //Registry path to details about the current installation (uninstall info)
+begin                            
+  Key := GetAppUninstallRegKey;
+  result := RegValueExists(HKEY_LOCAL_MACHINE, Key, 'UninstallString');
+end;
+
+//Return the install path used by the existing installation.
+function GetInstalledPath():string;
+var Key : string;
+begin
+  Key := GetAppUninstallRegKey;
+  RegQueryStringValue(HKEY_LOCAL_MACHINE, Key, 'InstallLocation', result);
+end;               
+
+function MoveLogfileToLogDir():boolean;
+var
+  logfilepathname, logfilename, newfilepathname: string;
+begin
+  logfilepathname := expandconstant('{log}');
+
+  //If logfile is disabled then logfilepathname is empty
+  if logfilepathname = '' then begin
+     result := false;
+     exit;
+  end;
+
+  logfilename := ExtractFileName(logfilepathname);
+  try
+    //Get the install path by first checking for existing installation thereafter by GUI settings
+    if IsAppInstalled then
+       newfilepathname := GetInstalledPath + 'logs\'
+    else
+       newfilepathname := expandconstant('{app}\logs\');
+  except
+    //This exception is raised if {app} is invalid i.e. if canceled is pressed on the Welcome page
+        try
+          newfilepathname := WizardDirValue + '\logs\'; 
+        except
+          //This exception is raised if WizardDirValue i s invalid i.e. if canceled is pressed on the Mutex check message dialog.
+          result := false;
+        end;
+  end;  
+  result := ForceDirectories(newfilepathname); //Make sure the destination path exists.
+  newfilepathname := newfilepathname + logfilename; //Add filename
+
+  //if copy successful then delete logfilepathname 
+  result := filecopy(logfilepathname, newfilepathname, false);
+
+  if result then
+     result := DeleteFile(logfilepathname);
+end;
+
+//Called just before Setup terminates. Note that this function is called even if the user exits Setup before anything is installed.
+procedure DeinitializeSetup();
+begin
+  MoveLogfileToLogDir;
 end;
