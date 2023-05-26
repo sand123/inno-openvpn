@@ -43,7 +43,7 @@ WizardStyle=modern
 Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
 Source: "{tmp}\{#OVPN_LATEST_BUILD}.msi"; DestDir: "{app}"; Flags: external
-Source: "{code:GetUnpackedConfigFile}"; DestDir: "{code:GetTargetConfigPath}"; Flags: external ignoreversion recursesubdirs createallsubdirs 
+Source: "{code:GetUnpackedConfigFile}"; DestDir: "{code:GetTargetConfigPath}"; Flags: external ignoreversion recursesubdirs createallsubdirs; BeforeInstall: UnpackConfig
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
@@ -55,7 +55,7 @@ FinishedLabelNoIcons=Установка выполнена. После пере�
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\logs\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall; BeforeInstall: BeforeMSIInstall 
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall; 
 
 [Code]
 const
@@ -221,7 +221,7 @@ begin
 end;
 
 // задачи до установки MSI
-procedure BeforeMSIInstall();
+procedure UnpackConfig();
 var 
   unpacked: String;
   fileRec: TFindRec;
@@ -382,13 +382,13 @@ begin
   try
     //Get the install path by first checking for existing installation thereafter by GUI settings
     if IsAppInstalled then
-       newfilepathname := GetInstalledPath + 'logs\'
+       newfilepathname := GetInstalledPath + '\'
     else
-       newfilepathname := expandconstant('{app}\logs\');
+       newfilepathname := expandconstant('{app}\');
   except
     //This exception is raised if {app} is invalid i.e. if canceled is pressed on the Welcome page
         try
-          newfilepathname := WizardDirValue + '\logs\'; 
+          newfilepathname := WizardDirValue + '\'; 
         except
           //This exception is raised if WizardDirValue i s invalid i.e. if canceled is pressed on the Mutex check message dialog.
           result := false;
