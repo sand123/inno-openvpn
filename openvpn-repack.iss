@@ -6,7 +6,7 @@
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутрення версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.4.20230525"
+#define PACKAGE_VERSION         "2.6.4.20230531"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "1"
 
