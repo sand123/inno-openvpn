@@ -6,7 +6,7 @@
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутрення версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.4.20230531"
+#define PACKAGE_VERSION         "2.6.4.20230608"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "1"
 
@@ -16,7 +16,7 @@ AllowNoIcons=yes
 AppComments=OpenVPN repacked by soho-service.ru support team
 AppCopyright=Copyright (C) 2023 Sokho-Service LLC
 AppId=openvpn_s3ru_repack
-AppName=OpenVPN S3RU Repack
+AppName=OpenVPN SohoSupport Repack
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
 AppVersion={#PACKAGE_VERSION}
@@ -43,7 +43,7 @@ WizardStyle=modern
 Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
 Source: "{tmp}\{#OVPN_LATEST_BUILD}.msi"; DestDir: "{app}"; Flags: external
-Source: "{code:GetUnpackedConfigFile}"; DestDir: "{code:GetTargetConfigPath}"; Flags: external ignoreversion recursesubdirs createallsubdirs; BeforeInstall: UnpackConfig
+Source: "{code:GetUnpackedConfigPath}\*"; DestDir: "{code:GetTargetConfigPath}"; Flags: external ignoreversion recursesubdirs createallsubdirs; BeforeInstall: UnpackConfig
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
@@ -67,6 +67,7 @@ var ProfileArchiveFilePage: TInputFileWizardPage;
     ProfileArchiveLocation: String;
     ProfileArchiveName: String;
     ProfileName: String;
+    UnpackedConfigPath: String;
     UnpackedConfigFile: String;
 
 function IsProfileSelected: Boolean;
@@ -93,9 +94,35 @@ begin
   end;
 end;
 
-function GetTargetConfigPath(Param: String): String;
+function IsDomainMember: Boolean;
+var
+  ADSInfo: Variant;  
+begin
+  try
+    Log('checking if domain member');
+    ADSInfo := CreateOleObject('AdSystemInfo');
+    Result := ADSinfo.DomainDNSName <> '';
+    Log('workstation is domain member');
+  except
+    Result := False;
+    Log('workstation is standalone');
+  end;  
+end;
+
+function GetTargetConfigPath(Param: String): String;  
 begin
     Result:= '{#OVPN_AUTOCONFIG_DIR}\';
+    Log('initial config destination is ' + Result);
+    if (Pos('$', UnpackedConfigFile) = 0) AND (IsDomainMember = False) Then
+    begin        
+        Result:= '{#OVPN_CONFIG_DIR}\';
+        Log('set destination to ' + Result);
+    end;
+end;
+
+function GetUnpackedConfigPath(Param: String): String;
+begin
+    Result:= UnpackedConfigPath;
 end;
 
 function GetUnpackedConfigFile(Param: String): String;
@@ -206,8 +233,7 @@ var
   ZipFile: Variant;
   TargetFolder: Variant;
 begin
-  Shell := CreateOleObject('Shell.Application');
-
+  Shell := CreateOleObject('Shell.Application');  
   ZipFile := Shell.NameSpace(ZipPath);
   if VarIsClear(ZipFile) then
     RaiseException(
@@ -217,7 +243,7 @@ begin
   if VarIsClear(TargetFolder) then
     RaiseException(Format('Путь "%s" не найден', [TargetPath]));
 
-  TargetFolder.CopyHere(ZipFile.Items, SHCONTCH_NOPROGRESSBOX or SHCONTCH_RESPONDYESTOALL);
+  TargetFolder.CopyHere(ZipFile.Items, SHCONTCH_NOPROGRESSBOX or SHCONTCH_RESPONDYESTOALL); 
 end;
 
 // задачи до установки MSI
@@ -233,17 +259,20 @@ begin
   Log('creating temp unpacked ' + unpacked);
   CreateDir(unpacked);
   Log('created');
-  Log('unzip to unpacked ...');
+  Log('unzip  '+ ProfileArchiveLocation + ' to ' + unpacked + ' ...');
   UnZip(ProfileArchiveLocation, unpacked);
   Log('unzip completed');
   Log('lookup config file')
-  if FindFirst(ExpandConstant('{tmp}\unpacked\*.ovpn'), fileRec) then
+  if FindFirst(ExpandConstant(unpacked + '\*.ovpn'), fileRec) then
   try
-      UnpackedConfigFile := ExpandConstant('{tmp}\unpacked\') + fileRec.Name;
+      UnpackedConfigFile := unpacked + '\' + fileRec.Name;
+      UnpackedConfigPath := unpacked; 
+      Log('set UnpackedConfigPath=' + UnpackedConfigPath);
   finally
     FindClose(fileRec);
   end;
   Log('found ' + UnpackedConfigFile);
+  Log('unpacking config completed - ready to copy to destination');
 end;
 
 
