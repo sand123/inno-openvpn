@@ -6,7 +6,7 @@
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутрення версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.4.20230608"
+#define PACKAGE_VERSION         "2.6.4.20230609"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "1"
 
@@ -16,7 +16,7 @@ AllowNoIcons=yes
 AppComments=OpenVPN repacked by soho-service.ru support team
 AppCopyright=Copyright (C) 2023 Sokho-Service LLC
 AppId=openvpn_s3ru_repack
-AppName=OpenVPN SohoSupport Repack
+AppName=OpenVPN SohoSupport Installer
 AppPublisher=Sokho-Service LLC
 AppPublisherURL=https://soho-service.ru
 AppVersion={#PACKAGE_VERSION}
@@ -28,7 +28,7 @@ DisableDirPage=yes
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
 FlatComponentsList=yes
-OutputBaseFilename=openvpn-bundle-{#SetupSetting("AppVersion")}-x64
+OutputBaseFilename=openvpn-installer-{#SetupSetting("AppVersion")}-x64
 OutputDir=..
 PrivilegesRequired=admin
 SetupIconFile=icon.ico
@@ -43,7 +43,6 @@ WizardStyle=modern
 Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
 Source: "{tmp}\{#OVPN_LATEST_BUILD}.msi"; DestDir: "{app}"; Flags: external
-Source: "{code:GetUnpackedConfigPath}\*"; DestDir: "{code:GetTargetConfigPath}"; Flags: external ignoreversion recursesubdirs createallsubdirs; BeforeInstall: UnpackConfig
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
@@ -56,6 +55,7 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
 Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall; 
+Filename: "xcopy.exe"; Parameters: """{tmp}\unpacked"" ""{code:GetTargetConfigPath}"" /C /R /Y"; Flags:runhidden; Check: IsWinSupported And IsDesktop; BeforeInstall: UnpackConfig;
 
 [Code]
 const
