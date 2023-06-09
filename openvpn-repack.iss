@@ -13,6 +13,7 @@
 [Setup]
 AllowCancelDuringInstall=no
 AllowNoIcons=yes
+AlwaysRestart=yes
 AppComments=OpenVPN repacked by soho-service.ru support team
 AppCopyright=Copyright (C) 2023 Sokho-Service LLC
 AppId=openvpn_s3ru_repack
@@ -328,7 +329,7 @@ procedure CurPageChanged(CurPageID: Integer);
 begin
     if (CurPageID = wpFinished) then
     begin
-      WizardForm.FinishedLabel.Caption := 'Для завершения нужно перезагрузить компьютер - после этого для подключения используйте свой логин и пароль для входа в рабочий компьютер (если программа спросит пароль). Иконка у Вас на рабочем столе - посмотрите на неё на картинке слева';
+      WizardForm.FinishedLabel.Caption := 'Если при подключении программа запросит пароль - укажите тот же, что и для входа в рабочий компьютер. Иконка у Вас на рабочем столе - посмотрите на неё на картинке слева';
     end
 end;
 
