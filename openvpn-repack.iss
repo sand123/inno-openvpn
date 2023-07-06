@@ -5,10 +5,12 @@
 #define OVPN_AUTOCONFIG_DIR     "c:\Program Files\OpenVPN\config-auto"
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
-// внутрення версия сборки = оригинальный_релиз.дата_сборки
+// внутренняя версия сборки = оригинальный_релиз.дата_сборки
 #define PACKAGE_VERSION         "2.6.4.20230609"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
-#define CONFIG_SET_RUN_AS_ADMIN "1"
+#define CONFIG_SET_RUN_AS_ADMIN "0"
+// править старые файлы конфигов https://gitea.ad.local/soho/vpn/issues/10
+#define CONFIG_UPDATE_CIPHERS "1"
 
 [Setup]
 AllowCancelDuringInstall=no
@@ -61,7 +63,8 @@ Filename: "xcopy.exe"; Parameters: """{tmp}\unpacked"" ""{code:GetTargetConfigPa
 [Code]
 const
   SHCONTCH_NOPROGRESSBOX = 4;
-  SHCONTCH_RESPONDYESTOALL = 16;  
+  SHCONTCH_RESPONDYESTOALL = 16;   
+  UNIX_LF = #10; 
 
 var ProfileArchiveFilePage: TInputFileWizardPage;
     DownloadPage: TDownloadWizardPage;
@@ -227,6 +230,28 @@ begin
   end;
 end;
 
+// настройка опций шифрования для совместимости со старым
+// только если CONFIG_UPDATE_CIPHERS = 1
+procedure UpdateConfigCiphers();
+var
+  //Lines := TStringList;
+  FileContents : String;
+begin
+  //Lines := TStringList.Create;
+  Log('check if legacy config *.ovpn - add ciphers, see /vpn/issues/10');
+  try
+    //Lines.LoadFromFile(UnpackedConfigFile);
+    //Lines.SaveToFile(UnpackedConfigFile);
+    LoadStringFromFile(UnpackedConfigFile, FileContents);
+    
+    Log('success');
+  except
+    Log('failed');
+  finally
+    //Lines.Free;
+  end;
+end;
+
 // распаковка архива встроенными средствами Windows 
 procedure UnZip(ZipPath, TargetPath: string);
 var
@@ -280,10 +305,14 @@ end;
 // задачи после установки MSI
 procedure AfterMSIInstall();
 begin
-  if '{#CONFIG_SET_RUN_AS_ADMIN}' <> '1' Then
+  if '{#CONFIG_SET_RUN_AS_ADMIN}' = '1' Then
   begin
     SetElevationBit;
   end;  
+  if '{#CONFIG_UPDATE_CIPHERS}' = '1' Then
+  begin
+    UpdateConfigCiphers;
+  end;
 end;
 
 // обновление индикатора загрузки на форме
