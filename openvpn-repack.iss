@@ -43,9 +43,9 @@ WizardImageFile=banner.bmp
 WizardStyle=modern
 
 [Files]
-Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall
-Source: "{tmp}\{#OVPN_LATEST_BUILD}.msi"; DestDir: "{app}"; Flags: external
+Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; BeforeInstall: UnpackConfig;
+Source: "{code:GetCertArchivePath}"; DestDir: "{tmp}"; Flags: external deleteafterinstall;
+Source: "{tmp}\{#OVPN_LATEST_BUILD}.msi"; DestDir: "{app}"; Flags: external;
 
 [Messages]
 WelcomeLabel1=Установка программы для доступа к корпоративной сети
@@ -57,8 +57,8 @@ FinishedLabelNoIcons=Установка выполнена. После пере�
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
-Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall; 
-Filename: "xcopy.exe"; Parameters: """{tmp}\unpacked"" ""{code:GetTargetConfigPath}"" /C /R /Y"; Flags:runhidden; Check: IsWinSupported And IsDesktop; BeforeInstall: UnpackConfig;
+Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop And IsConfigFound;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall;
+Filename: "xcopy.exe"; Parameters: """{tmp}\unpacked"" ""{code:GetTargetConfigPath}"" /C /R /Y"; Flags:runhidden; Check: IsWinSupported And IsDesktop And IsConfigFound; 
 
 [Code]
 const
@@ -73,6 +73,7 @@ var ProfileArchiveFilePage: TInputFileWizardPage;
     ProfileName: String;
     UnpackedConfigPath: String;
     UnpackedConfigFile: String;
+    ConfigIsAlreadyUnpacked: Boolean;
 
 function IsProfileSelected: Boolean;
 var selectedFile: String;
@@ -132,6 +133,11 @@ end;
 function GetUnpackedConfigFile(Param: String): String;
 begin
     Result:= UnpackedConfigFile;
+end;
+
+function IsConfigFound: Boolean;
+begin  
+  Result := (Pos('.ovpn', UnpackedConfigFile) > 0)
 end;
 
 Procedure ClearConfigOrCreatePath();
@@ -301,7 +307,7 @@ begin
   ZipFile := Shell.NameSpace(ZipPath);
   if VarIsClear(ZipFile) then
     RaiseException(
-      Format('Архив с настройками "%s" не может поврежден - запросите новую версию в техподдержке', [ZipPath]));
+      Format('Архив с настройками "%s" не удалось распаковать - запросите новую версию в техподдержке', [ZipPath]));
 
   TargetFolder := Shell.NameSpace(TargetPath);
   if VarIsClear(TargetFolder) then
@@ -310,12 +316,20 @@ begin
   TargetFolder.CopyHere(ZipFile.Items, SHCONTCH_NOPROGRESSBOX or SHCONTCH_RESPONDYESTOALL); 
 end;
 
-// задачи до установки MSI
+// распаковка
 procedure UnpackConfig();
 var 
   unpacked: String;
+  IsFound: Boolean;
   fileRec: TFindRec;
 begin  
+  if ConfigIsAlreadyUnpacked = True Then
+  begin
+    Log('config archive is already unpacked');
+    exit;
+  end;
+  ConfigIsAlreadyUnpacked := True;
+  IsFound := False;
   Log('clear config or create path');
   ClearConfigOrCreatePath();
   Log('config dir created');
@@ -332,8 +346,16 @@ begin
       UnpackedConfigFile := unpacked + '\' + fileRec.Name;
       UnpackedConfigPath := unpacked; 
       Log('set UnpackedConfigPath=' + UnpackedConfigPath);
+      IsFound := True;
   finally
     FindClose(fileRec);
+  end;
+
+  if IsFound = False Then
+  begin
+      MsgBox('Выбранный Вами архив с настройками не содержит файлов конфигурации OpenVPN - запросите новую версию в техподдержке', mbError, MB_OK);
+      Log('FAILED: *.ovpn file not found in ZIP');      
+      Exit;
   end;
   Log('found ' + UnpackedConfigFile);
   Log('unpacking config completed - ready to copy to destination');
