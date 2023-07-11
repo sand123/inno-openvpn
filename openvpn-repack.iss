@@ -234,16 +234,13 @@ end;
 // только если CONFIG_UPDATE_CIPHERS = 1
 procedure UpdateConfigCiphers();
 var
-  //Lines := TStringList;
-  FileContents : String;
+  Lines := TStringList;  
 begin
-  //Lines := TStringList.Create;
+  Lines := TStringList.Create;
   Log('check if legacy config *.ovpn - add ciphers, see /vpn/issues/10');
   try
-    //Lines.LoadFromFile(UnpackedConfigFile);
+    Lines.LoadFromFile(UnpackedConfigFile);
     //Lines.SaveToFile(UnpackedConfigFile);
-    LoadStringFromFile(UnpackedConfigFile, FileContents);
-    
     Log('success');
   except
     Log('failed');
