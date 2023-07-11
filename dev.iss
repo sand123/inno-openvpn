@@ -102,6 +102,9 @@ begin
   if CurStep = ssPostInstall then
   begin
     Log('Post install');
-    UpdateConfigCiphers();
+    if '{#CONFIG_UPDATE_CIPHERS}' = '1' Then
+    begin
+      UpdateConfigCiphers;
+    end;
   end;
 end;
