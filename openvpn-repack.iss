@@ -6,7 +6,7 @@
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутренняя версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.4.20230609"
+#define PACKAGE_VERSION         "2.6.4.20230711"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "0"
 // править старые файлы конфигов https://gitea.ad.local/soho/vpn/issues/10
@@ -232,20 +232,61 @@ end;
 
 // настройка опций шифрования для совместимости со старым
 // только если CONFIG_UPDATE_CIPHERS = 1
-procedure UpdateConfigCiphers();
+procedure UpdateConfigCiphers;
 var
-  Lines := TStringList;  
+  IsUpdated: Boolean;
+  Lines: TStringList;  
 begin
   Lines := TStringList.Create;
   Log('check if legacy config *.ovpn - add ciphers, see /vpn/issues/10');
+  IsUpdated := False;
   try
     Lines.LoadFromFile(UnpackedConfigFile);
-    //Lines.SaveToFile(UnpackedConfigFile);
+    Log('total config lines: ' + IntToStr(Lines.Count)); 
+    if Lines.Count > 50  then begin     
+      exit;
+    end;
+    If (Lines.IndexOf('cipher AES-256-CBC') > -1) OR (Lines.IndexOf('cipher BF-CBC') > -1) then
+    begin
+       Log('found legacy cipher');
+       If Lines.IndexOf('tls-cipher "DEFAULT:@SECLEVEL=0"') = -1 then 
+       begin 
+            IsUpdated := True;
+            Log('add config file param tls-cipher');
+            Lines.Add('tls-cipher "DEFAULT:@SECLEVEL=0"');
+       end;
+       If Lines.IndexOf('tls-version-min 1.0') = -1 then 
+       begin
+            IsUpdated := True;
+            Log('add config file param tls-version-min');
+            Lines.Add('tls-version-min 1.0');
+       end; 
+    end;
+    If Lines.IndexOf('cipher BF-CBC') > -1 then
+    begin
+       If Lines.IndexOf('providers legacy default') = -1 then 
+       begin 
+            IsUpdated := True;
+            Log('add config file param providers');
+            Lines.Add('providers legacy default');
+       end;
+       If Lines.IndexOf('compat-mode 2.3.6') = -1 then 
+       begin
+            IsUpdated := True;
+            Log('add config file param compat-mode');
+            Lines.Add('compat-mode 2.3.6');
+       end; 
+    end;
+    If IsUpdated = True Then
+    begin
+      Log('UPDATE config file!!!'); 
+      Lines.SaveToFile(UnpackedConfigFile);
+    end;
     Log('success');
   except
     Log('failed');
   finally
-    //Lines.Free;
+    Lines.Free;
   end;
 end;
 

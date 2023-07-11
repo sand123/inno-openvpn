@@ -43,16 +43,14 @@ procedure UpdateConfigCiphers;
 var
   IsUpdated: Boolean;
   Lines: TStringList;  
-  Index, Total: Integer;
-  Line: String;
 begin
   Lines := TStringList.Create;
   Log('check if legacy config *.ovpn - add ciphers, see /vpn/issues/10');
   IsUpdated := False;
   try
     Lines.LoadFromFile(UnpackedConfigFile);
-    Total := Lines.Count;
-    if Total > 50  then begin     
+    Log('total config lines: ' + IntToStr(Lines.Count)); 
+    if Lines.Count > 50  then begin     
       exit;
     end;
     If (Lines.IndexOf('cipher AES-256-CBC') > -1) OR (Lines.IndexOf('cipher BF-CBC') > -1) then
