@@ -58,7 +58,7 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Run]
 Filename: "msiexec.exe"; Parameters: "/i ""{app}\{#OVPN_LATEST_BUILD}.msi"" /l*v ""{app}\{#OVPN_LATEST_BUILD}.log"" /passive ADDLOCAL={#OVPN_INSTALL_COMPONENTS} ALLUSERS=1 SELECT_OPENVPNGUI=1 SELECT_SHORTCUTS=1 SELECT_ASSOCIATIONS=0 SELECT_OPENSSL_UTILITIES=0 SELECT_EASYRSA=0 SELECT_OPENSSLDLLS=1 SELECT_LZODLLS=1 SELECT_PKCS11DLLS=1"; WorkingDir: {app}; Check: IsWinSupported And IsDesktop And IsConfigFound;  StatusMsg: Установка системных компонентов ...; AfterInstall: AfterMSIInstall;
-Filename: "xcopy.exe"; Parameters: """{tmp}\unpacked"" ""{code:GetTargetConfigPath}"" /C /R /Y"; Flags:runhidden; Check: IsWinSupported And IsDesktop And IsConfigFound; 
+Filename: "xcopy.exe"; Parameters: """{tmp}\unpacked"" ""{code:GetTargetConfigPath}"" /C /R /Y"; Flags:runhidden; Check: IsWinSupported And IsDesktop And IsConfigFound; BeforeInstall: ClearConfigOrCreatePath
 
 [Code]
 const
@@ -142,19 +142,15 @@ end;
 
 Procedure ClearConfigOrCreatePath();
 begin                      
-  if ProfileName <> '' Then 
+  if IsConfigFound = False Then 
   begin
     Exit;
   end;
-  if Not DirExists('{#OVPN_INSTALL_DIR}') Then 
-  begin
-    Log('create dir {#OVPN_INSTALL_DIR}');
-    CreateDir('{#OVPN_INSTALL_DIR}')
-  end;
+  Log('try clear config or create path');    
   if DirExists('{#OVPN_CONFIG_DIR}') Then 
   begin
     Log('clear dir ' + '{#OVPN_CONFIG_DIR}');
-    DelTree('{#OVPN_CONFIG_DIR}\*', False, True, True);
+    DelTree('{#OVPN_CONFIG_DIR}', True, True, True);
   end;
   if Not DirExists('{#OVPN_CONFIG_DIR}') Then 
   begin
@@ -164,7 +160,7 @@ begin
   if DirExists('{#OVPN_AUTOCONFIG_DIR}') Then 
   begin
     Log('clear dir ' + '{#OVPN_AUTOCONFIG_DIR}');
-    DelTree('{#OVPN_AUTOCONFIG_DIR}\*', False, True, True);
+    DelTree('{#OVPN_AUTOCONFIG_DIR}', True, True, True);
   end;
   if Not DirExists('{#OVPN_AUTOCONFIG_DIR}') Then 
   begin
@@ -329,10 +325,7 @@ begin
     exit;
   end;
   ConfigIsAlreadyUnpacked := True;
-  IsFound := False;
-  Log('clear config or create path');
-  ClearConfigOrCreatePath();
-  Log('config dir created');
+  IsFound := False; 
   unpacked := ExpandConstant('{tmp}\unpacked');  
   Log('creating temp unpacked ' + unpacked);
   CreateDir(unpacked);
@@ -388,7 +381,7 @@ Procedure InitializeWizard();
 begin
   ProfileName:= '';
 
-  WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
+  //WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
   WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
   WizardForm.WelcomeLabel2.Font.Size := 14; // красный
 
@@ -406,7 +399,7 @@ begin
     ''
   );  
   
-  ProfileArchiveFilePage.SubCaptionLabel.Font.Size := 12;
+  ProfileArchiveFilePage.SubCaptionLabel.Font.Size := 10;
   ProfileArchiveFilePage.SubCaptionLabel.Font.Color := clRed;
   ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold];
 
