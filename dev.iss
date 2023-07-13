@@ -67,7 +67,13 @@ begin
             IsUpdated := True;
             Log('add config file param tls-version-min');
             Lines.Add('tls-version-min 1.0');
-       end; 
+       end;
+       If Lines.IndexOf('compat-mode 2.3.6') = -1 then 
+       begin
+            IsUpdated := True;
+            Log('add config file param compat-mode');
+            Lines.Add('compat-mode 2.3.6');
+       end;  
     end;
     If Lines.IndexOf('cipher BF-CBC') > -1 then
     begin
@@ -76,13 +82,7 @@ begin
             IsUpdated := True;
             Log('add config file param providers');
             Lines.Add('providers legacy default');
-       end;
-       If Lines.IndexOf('compat-mode 2.3.6') = -1 then 
-       begin
-            IsUpdated := True;
-            Log('add config file param compat-mode');
-            Lines.Add('compat-mode 2.3.6');
-       end; 
+       end;       
     end;
     If IsUpdated = True Then
     begin

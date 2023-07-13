@@ -6,7 +6,7 @@
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутренняя версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.4.20230711"
+#define PACKAGE_VERSION         "2.6.4.20230713"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "0"
 // править старые файлы конфигов https://gitea.ad.local/soho/vpn/issues/10
@@ -257,12 +257,19 @@ begin
             Log('add config file param tls-cipher');
             Lines.Add('tls-cipher "DEFAULT:@SECLEVEL=0"');
        end;
-       If Lines.IndexOf('tls-version-min 1.0') = -1 then 
+       // его выставляет compat-mode
+       //If Lines.IndexOf('tls-version-min 1.0') = -1 then 
+       //begin
+       //     IsUpdated := True;
+       //     Log('add config file param tls-version-min');
+       //     Lines.Add('tls-version-min 1.0');
+       //end;
+       If Lines.IndexOf('compat-mode 2.3.6') = -1 then 
        begin
             IsUpdated := True;
-            Log('add config file param tls-version-min');
-            Lines.Add('tls-version-min 1.0');
-       end; 
+            Log('add config file param compat-mode');
+            Lines.Add('compat-mode 2.3.6');
+       end;  
     end;
     If Lines.IndexOf('cipher BF-CBC') > -1 then
     begin
@@ -271,13 +278,7 @@ begin
             IsUpdated := True;
             Log('add config file param providers');
             Lines.Add('providers legacy default');
-       end;
-       If Lines.IndexOf('compat-mode 2.3.6') = -1 then 
-       begin
-            IsUpdated := True;
-            Log('add config file param compat-mode');
-            Lines.Add('compat-mode 2.3.6');
-       end; 
+       end;       
     end;
     If IsUpdated = True Then
     begin
