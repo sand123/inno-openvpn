@@ -441,7 +441,8 @@ begin
             Log('dl aborted by user.')
           else
             begin
-            SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
+            SuppressibleMsgBox('Не удалось загрузить программу для установки - проверьте доступ к сети Интернет и попробуйте позже', mbCriticalError, MB_OK, IDOK);
+            Log('download FAILED: ' + GetExceptionMessage)
             Result := False;
             Exit;
             end
