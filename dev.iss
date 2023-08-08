@@ -37,7 +37,23 @@ Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubd
 [Code]
 // настройка опций шифрования для совместимости со старым
 // только если CONFIG_UPDATE_CIPHERS = 1
-const UnpackedConfigFile = 'p:\Downloads\_ovpn\demo.ovpn';
+const UnpackedConfigFile = 'c:\windows\soho-service.ru\tmp\_ovpn\demo.ovpn';
+
+function IsDomainMember: Boolean;
+var
+  ADSInfo: Variant;  
+begin
+  try
+    Log('checking if domain member');
+    ADSInfo := CreateOleObject('AdSystemInfo');
+    Result := ADSinfo.DomainDNSName <> '';
+    Log('workstation is domain member');
+  except
+    Result := False;
+    Log(GetExceptionMessage);
+    Log('workstation is standalone');
+  end;  
+end;
 
 procedure UpdateConfigCiphers;
 var
@@ -102,9 +118,51 @@ begin
   if CurStep = ssPostInstall then
   begin
     Log('Post install');
+    IsDomainMember
     if '{#CONFIG_UPDATE_CIPHERS}' = '1' Then
     begin
       UpdateConfigCiphers;
     end;
   end;
+end;
+
+function MoveLogfileToLogDir():boolean;
+var
+  logfilepathname, logfilename, newfilepathname: string;
+begin
+  logfilepathname := expandconstant('{log}');
+
+  //If logfile is disabled then logfilepathname is empty
+  if logfilepathname = '' then begin
+     result := false;
+     exit;
+  end;
+
+  logfilename := ExtractFileName(logfilepathname);
+  try
+    //Get the install path by first checking for existing installation thereafter by GUI settings
+    newfilepathname := expandconstant('{app}\');       
+  except
+    //This exception is raised if {app} is invalid i.e. if canceled is pressed on the Welcome page
+        try
+          newfilepathname := WizardDirValue + '\'; 
+        except
+          //This exception is raised if WizardDirValue i s invalid i.e. if canceled is pressed on the Mutex check message dialog.
+          result := false;
+        end;
+  end;  
+  result := ForceDirectories(newfilepathname); //Make sure the destination path exists.
+  newfilepathname := newfilepathname + logfilename; //Add filename
+
+  //if copy successful then delete logfilepathname 
+  result := filecopy(logfilepathname, newfilepathname, false);
+
+  if result then
+     result := DeleteFile(logfilepathname);
+end;
+
+//Called just before Setup terminates. Note that this function is called even if the user exits Setup before anything is installed.
+procedure DeinitializeSetup();
+begin
+  MoveLogfileToLogDir;
 end;
