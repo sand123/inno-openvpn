@@ -6,7 +6,7 @@
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутренняя версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.4.20230808"
+#define PACKAGE_VERSION         "2.6.4.20230914"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "0"
 // править старые файлы конфигов https://gitea.ad.local/soho/vpn/issues/10
@@ -140,6 +140,21 @@ begin
   Result := (Pos('.ovpn', UnpackedConfigFile) > 0)
 end;
 
+function StringListHasSubstring(const S: String; StringList: TStringList): Boolean;
+var
+  CurrentString: Integer;
+begin
+  Result := False;
+CurrentString := 1;
+Repeat
+  if (Pos( S, StringList.Strings[CurrentString]) > 0) then begin
+    Result := True;
+    Break;
+  end;
+  CurrentString := CurrentString + 1;
+Until CurrentString > (StringList.Count - 1 );
+end;
+
 Procedure ClearConfigOrCreatePath();
 begin                      
   if IsConfigFound = False Then 
@@ -237,6 +252,7 @@ end;
 procedure UpdateConfigCiphers;
 var
   IsUpdated: Boolean;
+  IsKostyl: Boolean;
   Lines: TStringList;  
 begin
   Lines := TStringList.Create;
@@ -245,10 +261,12 @@ begin
   try
     Lines.LoadFromFile(UnpackedConfigFile);
     Log('total config lines: ' + IntToStr(Lines.Count)); 
-    if Lines.Count > 50  then begin     
+    //IsKostyl := StringListHasSubstring('pavlov', Lines);       
+    IsKostyl := Lines.IndexOf('MIIEcDCCA1igAwIBAgIJAPl9iP/O1JfxMA0GCSqGSIb3DQEBBQUAMIGAMQswCQYD') > -1;     
+    If (IsKostyl = False) AND (Lines.Count > 50) then begin     
       exit;
     end;
-    If (Lines.IndexOf('cipher AES-256-CBC') > -1) OR (Lines.IndexOf('cipher BF-CBC') > -1) then
+    If ((IsKostyl = True) OR (Lines.IndexOf('cipher AES-256-CBC') > -1) OR (Lines.IndexOf('cipher BF-CBC') > -1)) then
     begin
        Log('found legacy cipher');
        If Lines.IndexOf('tls-cipher "DEFAULT:@SECLEVEL=0"') = -1 then 

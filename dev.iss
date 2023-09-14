@@ -37,27 +37,27 @@ Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubd
 [Code]
 // настройка опций шифрования для совместимости со старым
 // только если CONFIG_UPDATE_CIPHERS = 1
-const UnpackedConfigFile = 'c:\windows\soho-service.ru\tmp\_ovpn\demo.ovpn';
+const UnpackedConfigFile = 'p:\samples\d.pavlov.ovpn';
 
-function IsDomainMember: Boolean;
+function StringListHasSubstring(const S: String; StringList: TStringList): Boolean;
 var
-  ADSInfo: Variant;  
+  CurrentString: Integer;
 begin
-  try
-    Log('checking if domain member');
-    ADSInfo := CreateOleObject('AdSystemInfo');
-    Result := ADSinfo.DomainDNSName <> '';
-    Log('workstation is domain member');
-  except
-    Result := False;
-    Log(GetExceptionMessage);
-    Log('workstation is standalone');
-  end;  
+  Result := False;
+CurrentString := 1;
+Repeat
+  if (Pos( S, StringList.Strings[CurrentString]) > 0) then begin
+    Result := True;
+    Break;
+  end;
+  CurrentString := CurrentString + 1;
+Until CurrentString > (StringList.Count - 1 );
 end;
 
 procedure UpdateConfigCiphers;
 var
   IsUpdated: Boolean;
+  IsKostyl: Boolean;
   Lines: TStringList;  
 begin
   Lines := TStringList.Create;
@@ -66,10 +66,12 @@ begin
   try
     Lines.LoadFromFile(UnpackedConfigFile);
     Log('total config lines: ' + IntToStr(Lines.Count)); 
-    if Lines.Count > 50  then begin     
+    //IsKostyl := StringListHasSubstring('pavlov', Lines);       
+    IsKostyl := Lines.IndexOf('MIIEcDCCA1igAwIBAgIJAPl9iP/O1JfxMA0GCSqGSIb3DQEBBQUAMIGAMQswCQYD') > -1;     
+    If (IsKostyl = False) AND (Lines.Count > 50) then begin     
       exit;
     end;
-    If (Lines.IndexOf('cipher AES-256-CBC') > -1) OR (Lines.IndexOf('cipher BF-CBC') > -1) then
+    If ((IsKostyl = True) OR (Lines.IndexOf('cipher AES-256-CBC') > -1) OR (Lines.IndexOf('cipher BF-CBC') > -1)) then
     begin
        Log('found legacy cipher');
        If Lines.IndexOf('tls-cipher "DEFAULT:@SECLEVEL=0"') = -1 then 
@@ -78,12 +80,13 @@ begin
             Log('add config file param tls-cipher');
             Lines.Add('tls-cipher "DEFAULT:@SECLEVEL=0"');
        end;
-       If Lines.IndexOf('tls-version-min 1.0') = -1 then 
-       begin
-            IsUpdated := True;
-            Log('add config file param tls-version-min');
-            Lines.Add('tls-version-min 1.0');
-       end;
+       // его выставляет compat-mode
+       //If Lines.IndexOf('tls-version-min 1.0') = -1 then 
+       //begin
+       //     IsUpdated := True;
+       //     Log('add config file param tls-version-min');
+       //     Lines.Add('tls-version-min 1.0');
+       //end;
        If Lines.IndexOf('compat-mode 2.3.6') = -1 then 
        begin
             IsUpdated := True;
@@ -113,12 +116,12 @@ begin
   end;
 end;
 
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
     Log('Post install');
-    IsDomainMember
     if '{#CONFIG_UPDATE_CIPHERS}' = '1' Then
     begin
       UpdateConfigCiphers;
