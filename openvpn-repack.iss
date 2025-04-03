@@ -1,12 +1,13 @@
 ﻿#define OVPN_DL_ROOT_URL        "https://swupdate.openvpn.org/community/releases/"
-#define OVPN_LATEST_BUILD       "OpenVPN-2.6.4-I001-amd64"
+#define OVPN_DL_FALLBACK_ROOT_URL "https://s0.soho-service.ru/storage/packages/utils/"
+#define OVPN_LATEST_BUILD       "OpenVPN-2.6.13-I002-amd64"
 #define OVPN_INSTALL_DIR        "c:\Program Files\OpenVPN"
 #define OVPN_CONFIG_DIR         "c:\Program Files\OpenVPN\config"
 #define OVPN_AUTOCONFIG_DIR     "c:\Program Files\OpenVPN\config-auto"
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутренняя версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.4.20230914"
+#define PACKAGE_VERSION         "2.6.13.20250403"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "0"
 // править старые файлы конфигов https://gitea.ad.local/soho/vpn/issues/10
@@ -17,7 +18,7 @@ AllowCancelDuringInstall=no
 AllowNoIcons=yes
 AlwaysRestart=yes
 AppComments=OpenVPN repacked by soho-service.ru support team
-AppCopyright=Copyright (C) 2023 Sokho-Service LLC
+AppCopyright=Copyright (C) 2025 Sokho-Service LLC
 AppId=openvpn_s3ru_repack
 AppName=OpenVPN SohoSupport Installer
 AppPublisher=Sokho-Service LLC
@@ -449,7 +450,10 @@ begin
   // все готово к установке - скачиваем релиз и запускаем
     begin     
       DownloadPage.Clear; 
-      DownloadPage.Add('{#OVPN_DL_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '');    
+      if IsDomainMember = True then       
+        DownloadPage.Add('{#OVPN_DL_FALLBACK_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '')           
+      else        
+        DownloadPage.Add('{#OVPN_DL_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '');       
       DownloadPage.Show;
       try
         try
@@ -467,6 +471,8 @@ begin
         end;
       finally
         DownloadPage.Hide;
+        Result := False;
+        Exit;                     
       end;      
     end
 end;
@@ -530,7 +536,7 @@ begin
   newfilepathname := newfilepathname + logfilename; //Add filename
 
   //if copy successful then delete logfilepathname 
-  result := filecopy(logfilepathname, newfilepathname, false);
+  result := CopyFile(logfilepathname, newfilepathname, false);
 
   if result then
      result := DeleteFile(logfilepathname);
