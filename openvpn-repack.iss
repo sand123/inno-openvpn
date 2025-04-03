@@ -439,8 +439,7 @@ end;
 function NextButtonClick(CurPageID: Integer): Boolean;
 var UseFallback : Boolean;
 begin  
-  Result := True;
-  UseFallback := False;
+  Result := True;  
   // окно выбора архива с сертификатом
   if (CurPageID = ProfileArchiveFilePage.ID) AND (IsProfileSelected = False) then
   begin
@@ -449,26 +448,27 @@ begin
     Exit;
   end;
   if CurPageID = wpReady then 
-  // все готово к установке - скачиваем релиз и запускаем
-    begin     
+  // все готово к установке - скачиваем релиз и запускаем    
+    begin
+      UseFallback := False;     
       DownloadPage.Clear; 
       DownloadPage.Add('{#OVPN_DL_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '');       
       DownloadPage.Show;
       try
         DownloadPage.Download;
       except
+        Result := False
         if DownloadPage.AbortedByUser then
           Log('dl aborted by user.')
         else
           begin
-            UseFallback := True
+            UseFallback := True            
             Log('download FAILED: ' + GetExceptionMessage)            
           end
       end;
       If UseFallback = False then
         begin
           DownloadPage.Hide;
-          Result := True;
           Exit;             
         end;       
       DownloadPage.Clear; 
@@ -477,20 +477,19 @@ begin
         try
           DownloadPage.Download;
         except
+          Result := False
           if DownloadPage.AbortedByUser then
             Log('dl aborted by user.')
           else
             begin
               SuppressibleMsgBox('Не удалось загрузить программу для установки - проверьте доступ к сети Интернет и попробуйте позже', mbCriticalError, MB_OK, IDOK);
-              Log('download FAILED: ' + GetExceptionMessage)
-              Result := False;
-              Exit;
+              Log('download FAILED: ' + GetExceptionMessage)  
+              DownloadPage.Hide;                          
             end
         end;
       finally
         begin
           DownloadPage.Hide;
-          Result := False;
           Exit;                     
         end  
       end;           
