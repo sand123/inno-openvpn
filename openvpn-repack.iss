@@ -1,13 +1,13 @@
 ﻿#define OVPN_DL_ROOT_URL        "https://swupdate.openvpn.org/community/releases/"
 #define OVPN_DL_FALLBACK_ROOT_URL "https://s0.soho-service.ru/storage/packages/utils/"
-#define OVPN_LATEST_BUILD       "OpenVPN-2.6.13-I002-amd64"
+#define OVPN_LATEST_BUILD       "OpenVPN-2.6.14-I001-amd64"
 #define OVPN_INSTALL_DIR        "c:\Program Files\OpenVPN"
 #define OVPN_CONFIG_DIR         "c:\Program Files\OpenVPN\config"
 #define OVPN_AUTOCONFIG_DIR     "c:\Program Files\OpenVPN\config-auto"
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутренняя версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.13.20250403"
+#define PACKAGE_VERSION         "2.6.14.20250606"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "0"
 // править старые файлы конфигов https://gitea.ad.local/soho/vpn/issues/10
@@ -424,6 +424,7 @@ begin
   ProfileArchiveFilePage.SubCaptionLabel.Font.Style := [fsBold];
 
   DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+  DownloadPage.ShowBaseNameInsteadOfUrl := True;
 end;
 
 // https://jrsoftware.org/ishelp/index.php?topic=scriptevents&anchor=CurPageChanged
@@ -439,12 +440,11 @@ end;
 function NextButtonClick(CurPageID: Integer): Boolean;
 var UseFallback : Boolean;
 begin  
-  Result := True;  
+  Result := False;  
   // окно выбора архива с сертификатом
   if (CurPageID = ProfileArchiveFilePage.ID) AND (IsProfileSelected = False) then
   begin
-    MsgBox('Выберите архив с настройками', mbError, MB_OK);
-    Result := False;
+    MsgBox('Выберите архив с настройками', mbError, MB_OK);   
     Exit;
   end;
   if CurPageID = wpReady then 
@@ -456,8 +456,8 @@ begin
       DownloadPage.Show;
       try
         DownloadPage.Download;
-      except
-        Result := False
+        Result := True;
+      except       
         if DownloadPage.AbortedByUser then
           Log('dl aborted by user.')
         else
@@ -476,6 +476,7 @@ begin
       try
         try
           DownloadPage.Download;
+          Result := True;
         except
           Result := False
           if DownloadPage.AbortedByUser then
