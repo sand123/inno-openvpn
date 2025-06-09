@@ -1,13 +1,24 @@
-﻿#define OVPN_DL_ROOT_URL        "https://swupdate.openvpn.org/community/releases/"
-#define OVPN_DL_FALLBACK_ROOT_URL "https://s0.soho-service.ru/storage/packages/utils/"
+﻿// test
+//#define OVPN_LATEST_BUILD       "7z2409-x64"
+//#define OVPN_DL_ROOT_URL        "https://www.7-zip.org/a/"
+//#define OVPN_DL_FALLBACK_ROOT_URL "https://s0.soho-service.ru/storage/packages/utils/"
+//#define OVPN_INSTALL_DIR        "c:\test"
+//#define OVPN_CONFIG_DIR         "c:\test\config"
+//#define OVPN_AUTOCONFIG_DIR     "c:\test\config-auto"
+//#define OVPN_INSTALL_COMPONENTS ""
+
+// prod
+
 #define OVPN_LATEST_BUILD       "OpenVPN-2.6.14-I001-amd64"
+#define OVPN_DL_ROOT_URL        "https://swupdate.openvpn.org/community/releases/"
+#define OVPN_DL_FALLBACK_ROOT_URL "https://s0.soho-service.ru/storage/packages/utils/"
 #define OVPN_INSTALL_DIR        "c:\Program Files\OpenVPN"
 #define OVPN_CONFIG_DIR         "c:\Program Files\OpenVPN\config"
 #define OVPN_AUTOCONFIG_DIR     "c:\Program Files\OpenVPN\config-auto"
 #define OVPN_INSTALL_COMPONENTS "OpenVPN.Service,OpenVPN.GUI,OpenVPN,Drivers,Drivers.TAPWindows6"
 
 // внутренняя версия сборки = оригинальный_релиз.дата_сборки
-#define PACKAGE_VERSION         "2.6.14.20250606"
+#define PACKAGE_VERSION         "2.6.14.20250609"
 // ярлык OpenVPN GUI добавить флаг Запускать с правами администратора
 #define CONFIG_SET_RUN_AS_ADMIN "0"
 // править старые файлы конфигов https://gitea.ad.local/soho/vpn/issues/10
@@ -403,7 +414,7 @@ begin
 
   //WizardForm.WelcomeLabel2.Font.Style := [fsBold]; //жирный текст в окне приветствия
   WizardForm.WelcomeLabel2.Font.Color := clRed; // красный
-  WizardForm.WelcomeLabel2.Font.Size := 14; // красный
+  WizardForm.WelcomeLabel2.Font.Size := 12; // красный
 
   ProfileArchiveFilePage :=
     CreateInputFilePage(
@@ -438,62 +449,61 @@ end;
 
 // служебный код - обработчик перехода по экранам
 function NextButtonClick(CurPageID: Integer): Boolean;
-var UseFallback : Boolean;
 begin  
-  Result := False;  
+  Result := True;   
   // окно выбора архива с сертификатом
   if (CurPageID = ProfileArchiveFilePage.ID) AND (IsProfileSelected = False) then
   begin
     MsgBox('Выберите архив с настройками', mbError, MB_OK);   
+    Result := False;  
     Exit;
   end;
   if CurPageID = wpReady then 
   // все готово к установке - скачиваем релиз и запускаем    
-    begin
-      UseFallback := False;     
+    begin         
       DownloadPage.Clear; 
       DownloadPage.Add('{#OVPN_DL_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '');       
       DownloadPage.Show;
       try
+        Log('try dl primary source')
         DownloadPage.Download;
         Result := True;
-      except       
+        Log('dl completed successfully (primary source)')
+        DownloadPage.Hide;
+        Exit;
+      except
+        Result := False;         
+        if DownloadPage.AbortedByUser then
+          begin
+            Log('dl aborted by user.')
+            DownloadPage.Hide;
+            Exit;
+          end
+        else
+          begin           
+            Log('download FAILED: ' + GetExceptionMessage)            
+          end
+      end;     
+      DownloadPage.Clear; 
+      DownloadPage.Add('{#OVPN_DL_FALLBACK_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '')                     
+      try
+        Log('try dl fallback source')
+        DownloadPage.Download;
+        Result := True;
+        Log('dl completed successfully (fallback source)')
+        DownloadPage.Hide;
+        Exit;
+      except
+        Result := False
         if DownloadPage.AbortedByUser then
           Log('dl aborted by user.')
         else
           begin
-            UseFallback := True            
-            Log('download FAILED: ' + GetExceptionMessage)            
+            SuppressibleMsgBox('Не удалось загрузить программу для установки - проверьте доступ к сети Интернет и попробуйте позже', mbCriticalError, MB_OK, IDOK);
+            Log('download FAILED: ' + GetExceptionMessage)              
           end
-      end;
-      If UseFallback = False then
-        begin
-          DownloadPage.Hide;
-          Exit;             
-        end;       
-      DownloadPage.Clear; 
-      DownloadPage.Add('{#OVPN_DL_FALLBACK_ROOT_URL}{#OVPN_LATEST_BUILD}.msi', '{#OVPN_LATEST_BUILD}.msi', '')                     
-      try
-        try
-          DownloadPage.Download;
-          Result := True;
-        except
-          Result := False
-          if DownloadPage.AbortedByUser then
-            Log('dl aborted by user.')
-          else
-            begin
-              SuppressibleMsgBox('Не удалось загрузить программу для установки - проверьте доступ к сети Интернет и попробуйте позже', mbCriticalError, MB_OK, IDOK);
-              Log('download FAILED: ' + GetExceptionMessage)  
-              DownloadPage.Hide;                          
-            end
         end;
-      finally
-        begin
-          DownloadPage.Hide;
-          Exit;                     
-        end  
-      end;           
+        DownloadPage.Hide;
     end;
 end;
 
